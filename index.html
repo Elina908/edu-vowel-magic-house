@@ -1,0 +1,1115 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#090b2b">
+  <title>元音魔法学院｜自然拼读游戏</title>
+  <style>
+    :root{
+      --bg:#070921;--panel:rgba(17,22,62,.78);--panel-2:rgba(25,30,78,.9);
+      --line:rgba(173,190,255,.18);--text:#f8f7ff;--muted:#b8bde3;
+      --gold:#ffd76a;--cyan:#58e7ff;--violet:#a681ff;--pink:#ff78c9;
+      --green:#62efb1;--red:#ff718a;--shadow:0 18px 60px rgba(0,0,0,.36);
+      --radius:24px;
+    }
+    *{box-sizing:border-box}
+    html{background:var(--bg);scroll-behavior:smooth}
+    body{
+      min-height:100vh;min-height:100dvh;margin:0;color:var(--text);
+      font-family:"SF Pro Rounded","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+      background:
+        radial-gradient(circle at 15% 10%,rgba(94,72,255,.28),transparent 30%),
+        radial-gradient(circle at 86% 18%,rgba(0,213,255,.16),transparent 26%),
+        linear-gradient(145deg,#080a28 0%,#111342 48%,#080922 100%);
+      overflow-x:hidden;touch-action:manipulation;
+    }
+    button{font:inherit}
+    button:focus-visible{outline:3px solid #fff;outline-offset:3px}
+    .sky,.stars,.aurora{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+    .sky{z-index:-3}
+    .stars{z-index:-2}
+    .star{
+      position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;
+      box-shadow:0 0 10px #fff;animation:twinkle var(--d) ease-in-out infinite;
+      opacity:var(--o)
+    }
+    .aurora{z-index:-1;filter:blur(50px);opacity:.48}
+    .aurora::before,.aurora::after{
+      content:"";position:absolute;width:45vw;height:45vw;border-radius:50%;
+      animation:floatGlow 10s ease-in-out infinite alternate
+    }
+    .aurora::before{left:-15vw;top:22%;background:rgba(116,72,255,.25)}
+    .aurora::after{right:-15vw;bottom:5%;background:rgba(0,221,255,.18);animation-delay:-4s}
+    @keyframes twinkle{50%{transform:scale(2.2);opacity:1}}
+    @keyframes floatGlow{to{transform:translate(8vw,-6vh) scale(1.16)}}
+    @keyframes breathe{50%{text-shadow:0 0 12px #fff,0 0 28px var(--cyan),0 0 56px var(--violet)}}
+    @keyframes hoverCard{50%{transform:translateY(-6px)}}
+    @keyframes pop{0%{transform:scale(.75);opacity:0}70%{transform:scale(1.08)}}
+    @keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+    @keyframes pulse{50%{box-shadow:0 0 0 10px rgba(255,215,106,0),0 0 35px rgba(255,215,106,.35)}}
+
+    .app{width:min(1560px,100%);margin:auto;padding:max(14px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+    .topbar{
+      min-height:72px;display:flex;align-items:center;gap:16px;justify-content:space-between;
+      padding:12px 16px;margin-bottom:14px;border:1px solid var(--line);border-radius:22px;
+      background:rgba(8,11,38,.68);backdrop-filter:blur(18px);box-shadow:var(--shadow)
+    }
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .crest{
+      width:50px;height:50px;display:grid;place-items:center;border-radius:17px;font-size:27px;
+      background:linear-gradient(145deg,rgba(255,217,107,.28),rgba(136,99,255,.34));
+      border:1px solid rgba(255,222,124,.5);box-shadow:inset 0 0 20px rgba(255,255,255,.08),0 0 24px rgba(132,111,255,.22)
+    }
+    h1{font-size:clamp(19px,2.3vw,31px);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.04em}
+    h1 span{color:var(--gold);animation:breathe 3s ease-in-out infinite}
+    .subtitle{font-size:12px;color:var(--muted);margin-top:3px}
+    .top-actions{display:flex;align-items:center;gap:8px}
+    .pill,.icon-btn,.mode-btn,.primary,.secondary,.option,.pattern-btn,.category-btn{
+      border:0;color:var(--text);cursor:pointer;-webkit-tap-highlight-color:transparent
+    }
+    .pill{display:flex;gap:6px;align-items:center;min-height:44px;padding:8px 12px;border-radius:14px;background:rgba(255,255,255,.075);border:1px solid var(--line)}
+    .icon-btn{width:46px;height:46px;border-radius:15px;background:rgba(255,255,255,.075);border:1px solid var(--line);font-size:20px}
+    .icon-btn:hover,.pill:hover{background:rgba(255,255,255,.13)}
+    .wrongbook-btn{position:relative;width:auto;min-width:110px;padding:0 12px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:13px;font-weight:900}
+    .wrongbook-count{
+      min-width:20px;height:20px;padding:0 6px;display:grid;place-items:center;border-radius:999px;
+      color:#24142c;background:linear-gradient(135deg,#ffb0bd,#ff718a);font-size:11px;box-shadow:0 0 14px rgba(255,113,138,.45)
+    }
+    .wrongbook-count:empty{display:none}
+    .layout{display:grid;grid-template-columns:minmax(210px,252px) minmax(400px,1fr) minmax(260px,320px);gap:14px;align-items:start}
+    .panel{
+      position:relative;border-radius:var(--radius);border:1px solid var(--line);
+      background:linear-gradient(155deg,rgba(26,31,78,.85),rgba(10,13,47,.82));
+      backdrop-filter:blur(18px);box-shadow:var(--shadow);overflow:hidden
+    }
+    .panel::before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.04),transparent 32%);pointer-events:none}
+    .side{padding:16px}
+    .panel-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 12px;font-size:15px;color:#e9e7ff}
+    .panel-title small{font-size:11px;color:var(--muted);font-weight:500}
+    .mode-switch{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px;padding:5px;background:rgba(0,0,0,.18);border-radius:16px}
+    .mode-btn{min-height:44px;border-radius:12px;background:transparent;color:var(--muted);font-weight:800}
+    .mode-btn.active{color:#17112d;background:linear-gradient(135deg,var(--gold),#ffefb2);box-shadow:0 6px 20px rgba(255,215,106,.25)}
+    .category-list{display:grid;gap:8px}
+    .category-btn{
+      min-height:52px;padding:9px 12px;border-radius:16px;display:flex;align-items:center;gap:10px;text-align:left;
+      background:rgba(255,255,255,.055);border:1px solid transparent;color:#d9dcfa
+    }
+    .category-btn .cat-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:11px;background:rgba(255,255,255,.08);font-size:18px}
+    .category-btn strong{display:block;font-size:14px}
+    .category-btn small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+    .category-btn.active{border-color:rgba(100,229,255,.62);background:linear-gradient(135deg,rgba(80,215,255,.2),rgba(152,102,255,.16));box-shadow:0 0 24px rgba(67,214,255,.1)}
+    .tip-box{margin-top:14px;padding:12px;border:1px dashed rgba(255,219,103,.4);border-radius:16px;background:rgba(255,210,78,.075);font-size:12px;line-height:1.65;color:#e9e2bd}
+
+    .stage{min-height:690px;display:flex;flex-direction:column;padding:18px}
+    .stage-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .breadcrumb{color:var(--muted);font-size:12px}
+    .breadcrumb strong{color:var(--cyan)}
+    .progress-wrap{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);min-width:150px}
+    .progress{height:8px;flex:1;border-radius:999px;background:rgba(255,255,255,.09);overflow:hidden}
+    .progress i{display:block;height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,var(--cyan),var(--violet),var(--pink));box-shadow:0 0 14px var(--cyan);transition:width .35s ease}
+    .lesson-card{
+      position:relative;flex:1;min-height:480px;border-radius:28px;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+      border:1px solid rgba(190,197,255,.22);background:
+        radial-gradient(circle at 50% 5%,rgba(121,92,255,.24),transparent 40%),
+        linear-gradient(160deg,rgba(26,28,77,.9),rgba(9,12,45,.95));
+      box-shadow:inset 0 0 60px rgba(91,95,255,.07),0 20px 50px rgba(0,0,0,.26)
+    }
+    .lesson-card::after{content:"✦";position:absolute;right:24px;top:20px;color:var(--gold);font-size:24px;filter:drop-shadow(0 0 9px var(--gold));animation:twinkle 2.2s infinite}
+    .pattern-orb{
+      width:92px;height:92px;border-radius:30px;display:grid;place-items:center;font:900 36px Georgia,serif;
+      color:#fff;background:linear-gradient(145deg,var(--pattern,#765fff),rgba(255,255,255,.08));
+      border:1px solid rgba(255,255,255,.32);box-shadow:0 0 20px color-mix(in srgb,var(--pattern) 55%,transparent),inset 0 0 24px rgba(255,255,255,.1);
+      animation:hoverCard 4s ease-in-out infinite
+    }
+    .sound-label{margin-top:14px;color:var(--gold);font-size:13px;font-weight:800}
+    .word{font-size:clamp(54px,8.2vw,100px);line-height:1;margin:18px 0 8px;font-weight:950;letter-spacing:.02em;text-shadow:0 0 26px rgba(168,133,255,.45);animation:breathe 3.5s infinite}
+    .word .focus{color:var(--gold);text-decoration:underline;text-decoration-color:rgba(255,215,106,.35);text-underline-offset:10px}
+    .phonics{font-size:clamp(16px,2vw,22px);color:#d9ddff;min-height:30px}
+    .meaning{font-size:14px;color:var(--muted);margin-top:7px}
+    .cue{
+      width:min(540px,100%);margin:18px auto 0;padding:12px 16px;border-radius:17px;
+      background:rgba(88,231,255,.075);border:1px solid rgba(88,231,255,.18);color:#d9fbff;font-size:13px;line-height:1.55
+    }
+    .card-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:22px}
+    .primary,.secondary{min-height:52px;padding:12px 18px;border-radius:17px;font-weight:900}
+    .primary{color:#15112b;background:linear-gradient(135deg,#ffe17d,#ffbd58);box-shadow:0 8px 24px rgba(255,196,80,.25)}
+    .secondary{background:rgba(255,255,255,.08);border:1px solid var(--line)}
+    .primary:active,.secondary:active,.option:active,.pattern-btn:active{transform:scale(.97)}
+    .word-dots{display:flex;justify-content:center;gap:7px;margin-top:15px}
+    .word-dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.18)}
+    .word-dots i.active{width:20px;border-radius:999px;background:var(--gold);box-shadow:0 0 10px var(--gold)}
+
+    .pattern-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+    .pattern-btn{
+      position:relative;min-height:47px;border-radius:13px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);
+      font:800 18px Georgia,serif
+    }
+    .pattern-btn::after{content:"";position:absolute;left:8px;right:8px;bottom:5px;height:2px;border-radius:3px;background:var(--c);opacity:.7}
+    .pattern-btn.active{background:color-mix(in srgb,var(--c) 25%,rgba(255,255,255,.06));border-color:var(--c);box-shadow:0 0 18px color-mix(in srgb,var(--c) 25%,transparent)}
+    .pattern-btn sup{margin-left:2px;color:var(--green);font:900 9px system-ui}
+    .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:11px;color:var(--muted);font-size:10px}
+    .legend span::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--c);margin-right:4px}
+    .daily{margin-top:14px;padding:13px;border-radius:17px;background:linear-gradient(135deg,rgba(162,118,255,.14),rgba(81,226,255,.08));border:1px solid var(--line)}
+    .daily-line{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted)}
+    .stars-earned{font-size:22px;letter-spacing:2px;color:var(--gold);filter:drop-shadow(0 0 6px rgba(255,215,106,.4));margin-top:8px}
+
+    .challenge{display:none;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:center}
+    .challenge.show{display:flex;animation:pop .38s ease}
+    .lesson-content.hide{display:none}
+    .challenge-top{width:100%;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+    .stat{padding:10px;border-radius:14px;background:rgba(255,255,255,.065);border:1px solid var(--line);font-size:11px;color:var(--muted)}
+    .stat strong{display:block;margin-top:3px;color:#fff;font-size:19px}
+    .challenge-type{font-size:12px;color:var(--cyan);font-weight:900;letter-spacing:.12em}
+    .question{font-size:clamp(24px,4vw,39px);font-weight:950;margin:12px 0 6px}
+    .question .target{color:var(--gold);text-shadow:0 0 18px rgba(255,215,106,.45)}
+    .listen-big{width:78px;height:78px;border:0;border-radius:27px;margin:14px 0;color:#17112d;font-size:31px;cursor:pointer;background:linear-gradient(145deg,var(--cyan),#a7f6ff);box-shadow:0 0 0 0 rgba(89,230,255,.45);animation:pulse 1.7s infinite}
+    .options{width:min(620px,100%);display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:15px}
+    .option{position:relative;min-height:72px;border-radius:20px;background:rgba(255,255,255,.075);border:1px solid var(--line);font-weight:900;font-size:22px;overflow:visible}
+    .option:hover{background:rgba(255,255,255,.12)}
+    .option.correct{background:rgba(77,239,170,.22);border-color:var(--green);box-shadow:0 0 26px rgba(98,239,177,.2)}
+    .option.wrong{background:rgba(255,94,125,.22);border-color:var(--red);animation:shake .35s}
+    .option.removed{display:none}
+    .option.soft-disabled{opacity:.28;pointer-events:none;filter:grayscale(.75)}
+    .options.reveal .option:not(.correct):not(.wrong){opacity:.24;filter:grayscale(.75);transform:scale(.97)}
+    .options.reveal .option{pointer-events:none;transition:opacity .25s,filter .25s,transform .25s,background .25s}
+    .combo-pop{height:28px;color:var(--gold);font-weight:900;margin-top:10px}
+    .challenge-hint{
+      width:min(620px,100%);min-height:47px;margin:11px auto 0;padding:10px 14px;border-radius:15px;
+      display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(255,215,106,.09);
+      border:1px solid rgba(255,215,106,.2);color:#fff0bb;font-size:13px;line-height:1.45
+    }
+    .challenge-hint:empty{visibility:hidden}
+    .recovery-flag{display:inline-flex;align-items:center;gap:5px;margin-bottom:7px;padding:6px 10px;border-radius:999px;background:rgba(98,239,177,.1);border:1px solid rgba(98,239,177,.2);font-size:11px;color:#d7ffed}
+    .shield-notice{display:inline-flex;align-items:center;gap:6px;margin:0 0 8px;padding:7px 11px;border-radius:999px;background:linear-gradient(135deg,rgba(88,231,255,.13),rgba(166,129,255,.12));border:1px solid rgba(88,231,255,.25);color:#d9fbff;font-size:11px;box-shadow:0 0 18px rgba(88,231,255,.08)}
+    .start-card,.result-card{width:min(570px,100%);padding:22px;border-radius:25px;background:rgba(18,22,65,.75);border:1px solid var(--line)}
+    .start-card .big,.result-card .big{font-size:53px;margin-bottom:8px}
+    .start-card h2,.result-card h2{margin:8px 0;font-size:28px}
+    .start-card p,.result-card p{color:var(--muted);line-height:1.7;font-size:14px}
+    .result-stars{font-size:44px;color:var(--gold);letter-spacing:6px;margin:15px 0;filter:drop-shadow(0 0 10px rgba(255,215,106,.5))}
+    .particle{position:fixed;width:9px;height:9px;border-radius:3px;z-index:1000;pointer-events:none;animation:burst .75s cubic-bezier(.2,.8,.3,1) forwards}
+    @keyframes burst{to{transform:translate(var(--x),var(--y)) rotate(300deg) scale(0);opacity:0}}
+
+    .feedback-overlay{
+      position:fixed;z-index:110;inset:0;display:flex;align-items:flex-end;justify-content:center;
+      padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));
+      background:rgba(3,5,23,.64);backdrop-filter:blur(8px);opacity:0;transition:opacity .25s ease
+    }
+    .feedback-overlay.show{opacity:1}
+    .feedback-sheet{
+      width:min(1040px,100%);max-height:min(84dvh,820px);overflow:auto;overscroll-behavior:contain;
+      padding:18px;border-radius:30px;background:linear-gradient(155deg,rgba(27,32,80,.96),rgba(10,13,44,.97));
+      border:1px solid rgba(220,218,255,.27);box-shadow:0 -25px 90px rgba(0,0,0,.55),0 0 60px rgba(113,86,255,.18);
+      transform:translateY(110%);transition:transform .38s cubic-bezier(.2,.85,.25,1)
+    }
+    .feedback-overlay.show .feedback-sheet{transform:translateY(0)}
+    .feedback-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px}
+    .feedback-badge{display:flex;align-items:center;gap:11px}
+    .feedback-badge .mark{
+      width:46px;height:46px;display:grid;place-items:center;border-radius:15px;font-size:23px;
+      background:rgba(255,91,124,.16);border:1px solid rgba(255,113,138,.45)
+    }
+    .feedback-badge h2{margin:0 0 4px;font-size:clamp(20px,3vw,29px)}
+    .feedback-badge h2 span{color:var(--green)}
+    .feedback-badge p{margin:0;color:var(--muted);font-size:12px}
+    .pause-chip{flex:0 0 auto;padding:8px 11px;border-radius:12px;background:rgba(88,231,255,.09);border:1px solid rgba(88,231,255,.2);color:#c8f8ff;font-size:11px}
+    .feedback-grid{display:grid;grid-template-columns:.92fr 1.08fr;gap:12px}
+    .explain-card{
+      padding:15px;border-radius:20px;background:rgba(255,255,255,.055);
+      border:1px solid var(--line);text-align:left
+    }
+    .explain-card h3{margin:0 0 11px;font-size:14px;color:#f4f2ff}
+    .answer-word{font-size:clamp(36px,6vw,58px);line-height:1;font-weight:950;margin:7px 0 13px;text-shadow:0 0 22px rgba(165,129,255,.3)}
+    .answer-word .focus{color:var(--gold)}
+    .fact-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .fact{padding:9px 10px;border-radius:13px;background:rgba(0,0,0,.15);border-left:3px solid var(--fact,var(--cyan))}
+    .fact small{display:block;color:var(--muted);font-size:10px;margin-bottom:3px}.fact strong{font-size:13px}
+    .compare-stack{display:grid;gap:9px}
+    .compare{padding:11px 12px;border-radius:15px;line-height:1.55;font-size:12px}
+    .compare strong{display:block;margin-bottom:3px;font-size:13px}
+    .compare.yes{background:rgba(98,239,177,.085);border:1px solid rgba(98,239,177,.2);color:#d9ffef}
+    .compare.no{background:rgba(255,113,138,.08);border:1px solid rgba(255,113,138,.18);color:#ffe0e6}
+    .memory{
+      display:flex;align-items:flex-start;gap:10px;margin-top:12px;padding:12px 14px;border-radius:17px;
+      background:linear-gradient(135deg,rgba(255,215,106,.13),rgba(255,179,81,.06));border:1px solid rgba(255,215,106,.25);color:#fff2c5;font-size:12px;line-height:1.55
+    }
+    .memory b{display:block;color:var(--gold);margin-bottom:2px}
+    .detail-toggle{margin-top:12px;border-radius:17px;background:rgba(255,255,255,.035);border:1px solid var(--line);overflow:hidden}
+    .detail-toggle summary{cursor:pointer;padding:13px 15px;color:#dfe4ff;font-weight:850;font-size:13px;list-style:none}
+    .detail-toggle summary::-webkit-details-marker{display:none}
+    .detail-toggle summary::after{content:"＋";float:right;color:var(--cyan)}
+    .detail-toggle[open] summary::after{content:"－"}
+    .detail-toggle .feedback-grid{padding:0 12px 12px}
+    .child-explain{padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,rgba(98,239,177,.1),rgba(88,231,255,.07));border:1px solid rgba(98,239,177,.22);font-size:15px;line-height:1.65;color:#ebfff7}
+    .child-explain b{color:var(--gold)}
+    .feedback-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:14px}
+    .feedback-actions button{min-width:150px}
+    .repair-quest{margin-top:12px;padding:13px;border-radius:20px;background:rgba(0,0,0,.14);border:1px solid rgba(166,129,255,.22)}
+    .repair-quest h3{margin:0 0 4px;font-size:15px}.repair-quest>p{margin:0 0 10px;color:var(--muted);font-size:11px}
+    .repair-steps{display:grid;gap:8px}
+    .repair-step{display:grid;grid-template-columns:34px minmax(0,1fr) auto;align-items:center;gap:9px;padding:10px;border-radius:15px;background:rgba(255,255,255,.045);border:1px solid transparent;transition:.25s}
+    .repair-step.done{background:rgba(98,239,177,.08);border-color:rgba(98,239,177,.2)}
+    .repair-step.locked{opacity:.48}
+    .repair-num{width:32px;height:32px;display:grid;place-items:center;border-radius:11px;background:rgba(255,255,255,.08);font-weight:950;color:var(--gold)}
+    .repair-step.done .repair-num{color:#13271e;background:var(--green)}
+    .repair-copy strong{display:block;font-size:13px}.repair-copy small{display:block;margin-top:2px;color:var(--muted);font-size:10px}
+    .repair-controls{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px}
+    .repair-mini{min-height:39px;padding:7px 11px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;cursor:pointer;font-size:12px;font-weight:850}
+    .repair-mini:disabled{opacity:.36;cursor:not-allowed}
+    .repair-mini.correct{background:rgba(98,239,177,.16);border-color:var(--green);color:#dbffed}
+    .repair-mini.wrong{background:rgba(255,113,138,.18);border-color:var(--red);animation:shake .35s}
+    .spell-box{display:none;grid-column:2/4;padding-top:4px}.spell-box.show{display:block}
+    .spell-target{min-height:35px;padding:7px 10px;border-radius:11px;background:rgba(0,0,0,.2);font:900 20px Georgia,serif;letter-spacing:.18em;color:var(--gold)}
+    .spell-tiles{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+    .spell-tile{width:38px;height:38px;border-radius:11px;background:rgba(88,231,255,.1);border:1px solid rgba(88,231,255,.24);color:#e5fcff;font:900 18px Georgia,serif;cursor:pointer}
+    .spell-tile:disabled{opacity:.18}
+    .later-chip{padding:7px 10px;border-radius:11px;background:rgba(166,129,255,.1);border:1px solid rgba(166,129,255,.2);color:#e8deff;font-size:10px}
+
+    .wrongbook-overlay{
+      position:fixed;z-index:120;inset:0;padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));
+      display:grid;place-items:center;background:rgba(3,5,23,.72);backdrop-filter:blur(12px);opacity:0;transition:opacity .25s ease
+    }
+    .wrongbook-overlay.show{opacity:1}
+    .wrongbook-shell{
+      width:min(1120px,100%);max-height:94dvh;display:flex;flex-direction:column;overflow:hidden;border-radius:30px;
+      background:radial-gradient(circle at 10% 0,rgba(255,113,138,.18),transparent 34%),linear-gradient(155deg,rgba(28,31,78,.98),rgba(9,12,43,.99));
+      border:1px solid rgba(224,218,255,.27);box-shadow:0 30px 100px rgba(0,0,0,.62),0 0 70px rgba(143,97,255,.18);
+      transform:translateY(24px) scale(.98);transition:transform .3s ease
+    }
+    .wrongbook-overlay.show .wrongbook-shell{transform:none}
+    .wrongbook-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 20px;border-bottom:1px solid var(--line)}
+    .wrongbook-title{display:flex;align-items:center;gap:12px;min-width:0}
+    .book-glyph{width:52px;height:52px;display:grid;place-items:center;border-radius:17px;font-size:28px;background:rgba(255,113,138,.14);border:1px solid rgba(255,113,138,.28);box-shadow:0 0 24px rgba(255,113,138,.16)}
+    .wrongbook-title h2{margin:0 0 3px;font-size:clamp(21px,3vw,30px)}
+    .wrongbook-title p{margin:0;color:var(--muted);font-size:12px}
+    .wrongbook-body{overflow:auto;overscroll-behavior:contain;padding:18px 20px 22px}
+    .alchemy-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+    .alchemy-stat{padding:13px 14px;border-radius:18px;background:rgba(255,255,255,.055);border:1px solid var(--line);color:var(--muted);font-size:11px}
+    .alchemy-stat strong{display:block;margin-top:4px;color:#fff;font-size:23px}
+    .alchemy-stat.due{background:linear-gradient(135deg,rgba(255,113,138,.12),rgba(255,255,255,.04))}
+    .alchemy-stat.gem{background:linear-gradient(135deg,rgba(88,231,255,.12),rgba(166,129,255,.09))}
+    .weakness-panel{margin-bottom:14px;padding:14px;border-radius:19px;background:rgba(255,215,106,.065);border:1px solid rgba(255,215,106,.16)}
+    .weakness-panel h3,.wrong-list-head h3{margin:0;font-size:14px}
+    .weakness-panel p{margin:5px 0 10px;color:var(--muted);font-size:11px}
+    .weak-chips{display:flex;flex-wrap:wrap;gap:8px}
+    .weak-chip{padding:8px 10px;border-radius:12px;background:rgba(0,0,0,.18);border:1px solid rgba(255,215,106,.16);color:#fff1bd;font-size:12px}
+    .weak-chip b{color:var(--gold)}
+    .wrong-list-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:16px 0 10px}
+    .wrong-list-head small{color:var(--muted)}
+    .wrong-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+    .wrong-card{position:relative;padding:14px 14px 14px 58px;border-radius:20px;background:rgba(255,255,255,.05);border:1px solid var(--line)}
+    .wrong-card.due{border-color:rgba(255,113,138,.34);box-shadow:inset 0 0 25px rgba(255,113,138,.045)}
+    .stone-orb{position:absolute;left:13px;top:14px;width:35px;height:35px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(145deg,#74798c,#343848);filter:grayscale(1);box-shadow:inset 0 0 12px rgba(255,255,255,.12),0 5px 16px rgba(0,0,0,.28);font-size:20px}
+    .wrong-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .wrong-word{font-size:25px;font-weight:950;line-height:1.1}
+    .wrong-word .focus{color:var(--gold)}
+    .wrong-pattern{display:inline-block;margin-top:5px;padding:4px 8px;border-radius:9px;background:color-mix(in srgb,var(--pc) 18%,transparent);color:var(--pc);font:900 13px Georgia,serif}
+    .review-chip{flex:0 0 auto;padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.07);color:var(--muted);font-size:10px}
+    .review-chip.now{color:#ffe0e6;background:rgba(255,113,138,.13);border:1px solid rgba(255,113,138,.2)}
+    .kid-reason{margin:11px 0 8px;padding:10px 11px;border-radius:14px;background:rgba(98,239,177,.07);color:#e6fff3;font-size:12px;line-height:1.55}
+    .error-type-chip{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:6px 9px;border-radius:999px;background:rgba(255,215,106,.09);border:1px solid rgba(255,215,106,.2);color:#fff0b8;font-size:10px;font-weight:850}
+    .error-focus{margin-top:10px;padding:11px 13px;border-radius:15px;background:linear-gradient(135deg,rgba(255,215,106,.09),rgba(255,113,138,.06));border:1px solid rgba(255,215,106,.17);font-size:12px;line-height:1.6;color:#fff4cf}
+    .error-focus b{color:var(--gold)}
+    .wrong-compare{font-size:11px;line-height:1.55;color:var(--muted)}
+    .wrong-compare b{color:#fff}
+    .alchemy-steps{display:flex;align-items:center;gap:5px;margin-top:11px}
+    .alchemy-steps i{height:5px;flex:1;border-radius:99px;background:rgba(255,255,255,.1)}
+    .alchemy-steps i.on{background:linear-gradient(90deg,var(--green),var(--cyan));box-shadow:0 0 8px rgba(88,231,255,.3)}
+    .alchemy-label{margin-top:5px;color:var(--muted);font-size:10px}
+    .book-empty{text-align:center;padding:32px 18px;border-radius:24px;background:rgba(255,255,255,.035);border:1px dashed rgba(98,239,177,.3)}
+    .book-empty .big{font-size:64px;filter:drop-shadow(0 0 20px rgba(88,231,255,.35))}
+    .book-empty h3{margin:8px 0 5px;font-size:23px}.book-empty p{margin:0;color:var(--muted);line-height:1.65;font-size:13px}
+    .wrongbook-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:15px;position:sticky;bottom:-22px;padding:14px 0 2px;background:linear-gradient(transparent,rgba(9,12,43,.98) 28%)}
+    .wrongbook-actions .primary[disabled]{opacity:.38;cursor:not-allowed;filter:grayscale(.7)}
+    .gem-shelf{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+    .gem-item{padding:7px 10px;border-radius:11px;background:linear-gradient(135deg,rgba(88,231,255,.18),rgba(255,120,201,.16),rgba(255,215,106,.15));border:1px solid rgba(88,231,255,.28);font-size:11px;color:#fff;box-shadow:0 0 15px rgba(88,231,255,.12);animation:breathe 3.4s ease-in-out infinite}
+    .clear-celebration{z-index:145}
+    .clear-celebration .welcome-card{background:radial-gradient(circle at 50% 0,rgba(88,231,255,.35),transparent 48%),linear-gradient(150deg,#201d68,#0a123b)}
+    .gem-transform{position:fixed;z-index:140;left:50%;top:50%;transform:translate(-50%,-50%);display:grid;place-items:center;pointer-events:none;text-align:center}
+    .gem-transform .morph{font-size:88px;animation:stoneToGem 1.35s cubic-bezier(.2,.8,.2,1) forwards;filter:grayscale(1) drop-shadow(0 8px 16px rgba(0,0,0,.4))}
+    .gem-transform strong{margin-top:5px;padding:8px 14px;border-radius:999px;background:rgba(10,13,44,.9);color:#fff4bd;box-shadow:0 0 28px rgba(88,231,255,.35);animation:pop .4s .6s both}
+    @keyframes stoneToGem{0%{transform:scale(.8) rotate(-8deg);filter:grayscale(1)}45%{transform:scale(1.35) rotate(8deg);filter:grayscale(.7) brightness(1.4)}100%{transform:scale(1) rotate(0);filter:grayscale(0) drop-shadow(0 0 34px var(--cyan));opacity:0}}
+
+    .welcome{
+      position:fixed;z-index:100;inset:0;display:grid;place-items:center;padding:22px;background:rgba(3,5,24,.82);backdrop-filter:blur(18px);
+      transition:opacity .45s,visibility .45s
+    }
+    .welcome.closed{opacity:0;visibility:hidden}
+    .welcome-card{
+      width:min(620px,100%);padding:clamp(24px,5vw,46px);border-radius:34px;text-align:center;
+      background:radial-gradient(circle at 50% 0,rgba(135,96,255,.35),transparent 50%),linear-gradient(150deg,#1a1e57,#0b0e35);
+      border:1px solid rgba(216,210,255,.27);box-shadow:0 30px 100px rgba(0,0,0,.6),0 0 70px rgba(101,78,255,.22)
+    }
+    .welcome-icon{font-size:72px;filter:drop-shadow(0 0 20px rgba(255,215,106,.45));animation:hoverCard 3s infinite}
+    .welcome h2{font-size:clamp(28px,6vw,46px);margin:12px 0 8px}
+    .welcome h2 span{color:var(--gold)}
+    .welcome p{color:var(--muted);line-height:1.75}
+    .welcome .primary{font-size:17px;padding-inline:28px;margin-top:10px}
+    .daily-plan{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0 8px}
+    .daily-plan div{padding:10px 8px;border-radius:15px;background:rgba(255,255,255,.055);border:1px solid var(--line);font-size:11px;color:var(--muted)}
+    .daily-plan strong{display:block;margin-bottom:3px;color:#fff;font-size:16px}
+    .welcome-actions{display:flex;justify-content:center;gap:9px;flex-wrap:wrap}
+    .welcome-actions .secondary{margin-top:10px}
+    .daily-badge{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:7px 11px;border-radius:999px;background:rgba(88,231,255,.09);border:1px solid rgba(88,231,255,.2);color:#c9f8ff;font-size:11px}
+
+    .toast{position:fixed;z-index:90;left:50%;bottom:28px;transform:translate(-50%,30px);padding:11px 17px;border-radius:14px;background:#f7f4ff;color:#15132e;font-weight:800;opacity:0;transition:.3s;box-shadow:var(--shadow);pointer-events:none}
+    .toast.show{opacity:1;transform:translate(-50%,0)}
+
+    @media (orientation:portrait), (max-width:900px){
+      .layout{grid-template-columns:1fr}
+      .stage{order:1;min-height:620px}.left-panel{order:2}.right-panel{order:3}
+      .category-list{grid-template-columns:repeat(2,1fr)}
+      .pattern-grid{grid-template-columns:repeat(6,1fr)}
+      .topbar{position:relative}.subtitle{display:none}
+      .feedback-grid{grid-template-columns:1fr}.feedback-sheet{max-height:88dvh}
+      .wrong-list{grid-template-columns:1fr}
+    }
+    @media (max-width:620px){
+      .app{padding-inline:10px}.topbar{padding:10px}.crest{width:43px;height:43px}.pill span:last-child{display:none}
+      .layout{gap:10px}.stage{padding:12px;min-height:600px}.lesson-card{padding:14px;min-height:460px}
+      .word{font-size:58px}.pattern-grid{grid-template-columns:repeat(5,1fr)}.options{grid-template-columns:1fr}
+      .challenge-top{grid-template-columns:1fr 1fr}
+      .top-actions .pill{display:none}.category-list{grid-template-columns:1fr 1fr}.category-btn{padding:7px;min-height:50px}
+      .feedback-overlay{padding:8px}.feedback-sheet{padding:14px;border-radius:24px}.feedback-head{display:block}.pause-chip{display:inline-block;margin-top:10px}
+      .feedback-actions{display:grid;grid-template-columns:1fr 1fr}.feedback-actions button{min-width:0;padding-inline:10px}
+      .repair-step{grid-template-columns:32px 1fr}.repair-controls{grid-column:1/3;justify-content:stretch}.repair-controls>*{flex:1}.spell-box{grid-column:1/3}
+      .daily-plan strong{font-size:14px}
+      .wrongbook-btn{min-width:46px;width:46px;padding:0;font-size:0}.wrongbook-btn::before{content:"📕";font-size:20px}.wrongbook-btn .wrongbook-count{position:absolute;right:-5px;top:-5px;font-size:10px}
+      .wrongbook-body{padding:13px}.wrongbook-head{padding:13px}.book-glyph{width:44px;height:44px}.wrongbook-title p{display:none}
+      .alchemy-summary{gap:6px}.alchemy-stat{padding:10px}.alchemy-stat strong{font-size:19px}
+      .wrongbook-actions{display:grid;grid-template-columns:1fr 1fr}.wrongbook-actions button{padding-inline:8px;min-width:0}
+    }
+    @media (prefers-reduced-motion:reduce){
+      *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}
+    }
+  </style>
+</head>
+<body>
+  <div class="sky"></div><div class="stars" id="stars"></div><div class="aurora"></div>
+
+  <div class="welcome" id="welcome">
+    <div class="welcome-card">
+      <div class="welcome-icon">🪄</div>
+      <div class="daily-badge">🌱 初学者友好 · 不限时</div>
+      <h2>开始今天的<span>5分钟魔法课</span></h2>
+      <p>系统已经为你准备好今天的小任务。<br>不用选课程，跟着魔法路线一步一步学。</p>
+      <div class="daily-plan">
+        <div><strong>1个</strong>新组合</div>
+        <div><strong>2组</strong>轻松复习</div>
+        <div><strong>约5分钟</strong>随时可停</div>
+      </div>
+      <div class="welcome-actions">
+        <button class="primary" id="enterBtn">▶ 开始今日魔法课</button>
+        <button class="secondary" id="exploreBtn">自由探索</button>
+        <button class="secondary" id="welcomeWrongBook">📕 错题魔法书</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="crest" aria-hidden="true">🏰</div>
+        <div><h1><span>元音</span>魔法学院</h1><div class="subtitle">看见字母组合 · 听见声音魔法 · 拼出完整单词</div></div>
+      </div>
+      <div class="top-actions">
+        <div class="pill" aria-label="今日获得星星"><span>⭐</span><span id="totalStars">0</span></div>
+        <button class="icon-btn wrongbook-btn" id="wrongBookBtn" aria-label="打开错题魔法书" title="错题魔法书">📕 错题书 <span class="wrongbook-count" id="wrongBookCount"></span></button>
+        <button class="icon-btn" id="homeBtn" aria-label="返回今日课程首页" title="今日课程">🏠</button>
+        <button class="icon-btn" id="soundBtn" aria-label="关闭音效" title="音效开关">🔊</button>
+        <button class="icon-btn" id="fullBtn" aria-label="进入全屏" title="全屏">⛶</button>
+      </div>
+    </header>
+
+    <section class="layout">
+      <aside class="panel side left-panel">
+        <div class="mode-switch" aria-label="学习模式选择">
+          <button class="mode-btn active" data-mode="learn">📖 学习</button>
+          <button class="mode-btn" data-mode="challenge">⚔️ 挑战</button>
+        </div>
+        <h2 class="panel-title">魔法课程 <small>由易到难</small></h2>
+        <div class="category-list" id="categoryList"></div>
+        <div class="tip-box"><strong>🧙 小秘诀</strong><br>先找元音“老大”，再看旁边站着谁。字母伙伴不同，声音也可能改变。</div>
+      </aside>
+
+      <section class="panel stage">
+        <div class="stage-head">
+          <div class="breadcrumb">正在学习 · <strong id="crumb">短元音</strong></div>
+          <div class="progress-wrap"><span id="progressText">1/5</span><div class="progress"><i id="progressBar"></i></div></div>
+        </div>
+
+        <div class="lesson-card">
+          <div class="lesson-content" id="lessonContent">
+            <div class="pattern-orb" id="patternOrb">a</div>
+            <div class="sound-label" id="soundLabel">短音 /æ/</div>
+            <div class="word" id="word">cat</div>
+            <div class="phonics" id="phonics">c · a · t → cat</div>
+            <div class="meaning" id="meaning">🐱 小猫</div>
+            <div class="cue" id="cue">嘴巴张开，像说 apple 开头的声音。声音短短的，不要读成字母名 A。</div>
+            <div class="card-actions">
+              <button class="primary" id="speakBtn">🔊 听单词</button>
+              <button class="secondary" id="slowBtn">🐢 慢速听</button>
+              <button class="secondary" id="nextBtn">下一个 →</button>
+            </div>
+            <div class="word-dots" id="wordDots"></div>
+          </div>
+
+          <div class="challenge" id="challenge"></div>
+        </div>
+      </section>
+
+      <aside class="panel side right-panel">
+        <h2 class="panel-title">元音星图 <small>点亮一个组合</small></h2>
+        <div class="pattern-grid" id="patternGrid"></div>
+        <div class="legend">
+          <span style="--c:#ff718a">单元音</span>
+          <span style="--c:#ffd76a">结尾 e</span>
+          <span style="--c:#62efb1">w / y / r</span>
+          <span style="--c:#58a9ff">元音组合</span>
+        </div>
+        <div class="daily">
+          <div class="daily-line"><span>今日魔力</span><strong id="learnCount">0 个单词</strong></div>
+          <div class="stars-earned" id="starDisplay">☆☆☆☆☆</div>
+        </div>
+      </aside>
+    </section>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const C={red:"#ff718a",yellow:"#ffd76a",gold:"#ffd76a",green:"#62efb1",cyan:"#58e7ff",blue:"#58a9ff",violet:"#a681ff"};
+    const categories=[
+      {id:"short",name:"五位元音队长",sub:"单个短元音",icon:"💎"},
+      {id:"magic",name:"神奇结尾 e",sub:"a_e · i_e · o_e · u_e",icon:"🪄"},
+      {id:"r",name:"海盗船长 R",sub:"ar · or · er · ir · ur",icon:"🏴‍☠️"},
+      {id:"wy",name:"W / Y 伙伴",sub:"aw · ay · ew · oy · ow",icon:"🪽"},
+      {id:"team",name:"双元音联盟",sub:"ai · ee · ea · oa · oo…",icon:"🤝"}
+    ];
+    const P=(id,cat,sound,cue,color,words)=>({id,cat,sound,cue,color,words});
+    const W=(w,zh,split,emoji)=>({w,zh,split,emoji});
+    const patterns=[
+      P("a","short","短音 /æ/","嘴巴张开，像 apple 开头的声音。声音短短的，不读字母名 A。",C.red,[W("cat","小猫","c · a · t","🐱"),W("map","地图","m · a · p","🗺️"),W("bag","书包","b · a · g","🎒"),W("hat","帽子","h · a · t","🎩"),W("apple","苹果","a · pp · le","🍎")]),
+      P("e","short","短音 /e/","嘴角微微向两边，发出短短的 e，像 egg 开头的声音。",C.red,[W("bed","床","b · e · d","🛏️"),W("hen","母鸡","h · e · n","🐔"),W("pen","钢笔","p · e · n","🖊️"),W("red","红色","r · e · d","🔴"),W("egg","鸡蛋","e · gg","🥚")]),
+      P("i","short","短音 /ɪ/","嘴巴放松，发很短的 i，像 insect 开头的声音。",C.red,[W("pig","小猪","p · i · g","🐷"),W("fish","鱼","f · i · sh","🐟"),W("sit","坐下","s · i · t","🪑"),W("milk","牛奶","m · i · lk","🥛"),W("six","六","s · i · x","6️⃣")]),
+      P("o","short","短音 /ɒ/ 或 /ɑ/","嘴巴圆圆地张开，发 hot 中间的短音；不同口音会稍有不同。",C.red,[W("hot","热的","h · o · t","🔥"),W("dog","小狗","d · o · g","🐶"),W("box","盒子","b · o · x","📦"),W("fox","狐狸","f · o · x","🦊"),W("clock","时钟","cl · o · ck","⏰")]),
+      P("u","short","短音 /ʌ/","嘴巴自然打开，声音从喉咙短短出来，像 up 开头的声音。",C.red,[W("sun","太阳","s · u · n","☀️"),W("cup","杯子","c · u · p","🥤"),W("bus","公交车","b · u · s","🚌"),W("duck","鸭子","d · u · ck","🦆"),W("run","跑","r · u · n","🏃")]),
+      P("a_e","magic","长音 /eɪ/","结尾 e 安静不出声，却提醒前面的 a 说自己的字母名 A。",C.yellow,[W("cake","蛋糕","c · a_e · k","🎂"),W("name","名字","n · a_e · m","🏷️"),W("game","游戏","g · a_e · m","🎮"),W("plane","飞机","pl · a_e · n","✈️"),W("snake","蛇","sn · a_e · k","🐍")]),
+      P("i_e","magic","长音 /aɪ/","结尾 e 不出声，让 i 说自己的字母名 I。",C.yellow,[W("bike","自行车","b · i_e · k","🚲"),W("time","时间","t · i_e · m","⏳"),W("kite","风筝","k · i_e · t","🪁"),W("five","五","f · i_e · v","5️⃣"),W("smile","微笑","sm · i_e · l","😊")]),
+      P("o_e","magic","长音 /oʊ/","结尾 e 施展魔法，让 o 说自己的字母名 O。",C.yellow,[W("home","家","h · o_e · m","🏠"),W("nose","鼻子","n · o_e · s","👃"),W("rope","绳子","r · o_e · p","🪢"),W("stone","石头","st · o_e · n","🪨"),W("globe","地球仪","gl · o_e · b","🌍")]),
+      P("u_e","magic","长音 /juː/ 或 /uː/","结尾 e 让 u 发长音；有时像 U，有时像长长的 oo。",C.yellow,[W("cube","方块","c · u_e · b","🧊"),W("cute","可爱的","c · u_e · t","🥰"),W("mule","骡子","m · u_e · l","🐴"),W("tube","管子","t · u_e · b","🧪"),W("June","六月","J · u_e · n","🗓️")]),
+      P("ar","r","/ɑːr/","a 遇见 r，像海盗船长喊 arrr：car、star。",C.green,[W("car","汽车","c · ar","🚗"),W("star","星星","st · ar","⭐"),W("farm","农场","f · ar · m","🚜"),W("park","公园","p · ar · k","🌳"),W("shark","鲨鱼","sh · ar · k","🦈")]),
+      P("or","r","/ɔːr/","o 遇见 r，嘴巴先圆起来，再轻轻带出 r。",C.green,[W("fork","叉子","f · or · k","🍴"),W("corn","玉米","c · or · n","🌽"),W("horse","马","h · or · se","🐎"),W("short","短的","sh · or · t","📏"),W("storm","暴风雨","st · or · m","⛈️")]),
+      P("er","r","/ɜːr/","er 常发卷舌的“饿儿”音；先听单词，再模仿嘴巴动作。",C.green,[W("her","她","h · er","👧"),W("term","学期","t · er · m","📚"),W("fern","蕨类","f · er · n","🌿"),W("germ","细菌","g · er · m","🦠"),W("verb","动词","v · er · b","📝")]),
+      P("ir","r","/ɜːr/","ir 在 bird 里和 er 很像，重点记住字母写法。",C.green,[W("bird","小鸟","b · ir · d","🐦"),W("girl","女孩","g · ir · l","👧"),W("shirt","衬衫","sh · ir · t","👕"),W("first","第一","f · ir · st","🥇"),W("third","第三","th · ir · d","🥉")]),
+      P("ur","r","/ɜːr/","ur 也常发和 er、ir 相近的声音，听清后记住拼写。",C.green,[W("turn","转弯","t · ur · n","↪️"),W("nurse","护士","n · ur · se","🧑‍⚕️"),W("purple","紫色","p · ur · ple","🟣"),W("turtle","乌龟","t · ur · tle","🐢"),W("hurt","受伤","h · ur · t","🩹")]),
+      P("aw","wy","/ɔː/","a 和 w 组成 aw，像看到惊喜时拉长声音：aw！",C.green,[W("saw","看见了","s · aw","👀"),W("paw","爪子","p · aw","🐾"),W("straw","吸管","str · aw","🥤"),W("draw","画画","dr · aw","🎨"),W("yawn","打哈欠","y · aw · n","🥱")]),
+      P("ay","wy","长音 /eɪ/","ay 常站在单词或音节末尾，和 ai 一样常发长 A。",C.green,[W("day","一天","d · ay","🌞"),W("play","玩","pl · ay","🛝"),W("stay","停留","st · ay","🛑"),W("tray","托盘","tr · ay","🍽️"),W("gray","灰色","gr · ay","🩶")]),
+      P("ew","wy","/juː/ 或 /uː/","ew 常发长长的 u/oo 音，嘴唇向前收圆。",C.green,[W("new","新的","n · ew","🆕"),W("few","少量","f · ew","🤏"),W("stew","炖菜","st · ew","🍲"),W("crew","全体成员","cr · ew","👥"),W("chew","咀嚼","ch · ew","😋")]),
+      P("oy","wy","/ɔɪ/","oy 常在单词末尾，声音从圆嘴滑向微笑嘴。",C.green,[W("boy","男孩","b · oy","👦"),W("toy","玩具","t · oy","🧸"),W("joy","快乐","j · oy","😄"),W("enjoy","享受","en · j · oy","🎉"),W("annoy","打扰","ann · oy","😣")]),
+      P("ow","wy","长音 /oʊ/","ow 有时发长 O，如 snow；遇到 cow 时却会换一种声音。",C.green,[W("snow","雪","sn · ow","❄️"),W("blow","吹","bl · ow","🌬️"),W("grow","生长","gr · ow","🌱"),W("yellow","黄色","yell · ow","🟡"),W("window","窗户","wind · ow","🪟")]),
+      P("ai","team","长音 /eɪ/","ai 常在单词中间，两个字母合作发长 A。",C.blue,[W("rain","雨","r · ai · n","🌧️"),W("train","火车","tr · ai · n","🚆"),W("mail","邮件","m · ai · l","✉️"),W("snail","蜗牛","sn · ai · l","🐌"),W("paint","画；颜料","p · ai · nt","🖌️")]),
+      P("ee","team","长音 /iː/","ee 像两个 e 手拉手，发长长的 E 音。",C.blue,[W("tree","树","tr · ee","🌳"),W("green","绿色","gr · ee · n","🟢"),W("feet","脚（复数）","f · ee · t","🦶"),W("sheep","绵羊","sh · ee · p","🐑"),W("queen","女王","qu · ee · n","👑")]),
+      P("ea","team","常见长音 /iː/","ea 在这些单词里常像 ee；但在 head 中会换声音，需要单独记。",C.blue,[W("sea","大海","s · ea","🌊"),W("leaf","叶子","l · ea · f","🍃"),W("read","阅读","r · ea · d","📖"),W("clean","干净的","cl · ea · n","🧼"),W("team","团队","t · ea · m","👫")]),
+      P("oa","team","长音 /oʊ/","oa 常在单词中间，两个元音一起发长 O。",C.blue,[W("boat","小船","b · oa · t","⛵"),W("goat","山羊","g · oa · t","🐐"),W("coat","外套","c · oa · t","🧥"),W("road","道路","r · oa · d","🛣️"),W("toast","吐司","t · oa · st","🍞")]),
+      P("oo","team","长音 /uː/","两个 o 常发长长的 oo；但 book 里的 oo 会短一些。",C.blue,[W("moon","月亮","m · oo · n","🌙"),W("spoon","勺子","sp · oo · n","🥄"),W("food","食物","f · oo · d","🍱"),W("room","房间","r · oo · m","🚪"),W("zoo","动物园","z · oo","🦁")]),
+      P("oi","team","/ɔɪ/","oi 常在单词中间，和 oy 发相同的滑动音。",C.blue,[W("coin","硬币","c · oi · n","🪙"),W("oil","油","oi · l","🛢️"),W("point","指向","p · oi · nt","👉"),W("soil","土壤","s · oi · l","🪴"),W("boil","煮沸","b · oi · l","♨️")]),
+      P("ou","team","/aʊ/","ou 在这些词里像惊讶地说“奥！”；它还有其他读音，先记常见的一组。",C.blue,[W("house","房子","h · ou · se","🏡"),W("mouse","老鼠","m · ou · se","🐭"),W("cloud","云","cl · ou · d","☁️"),W("mouth","嘴巴","m · ou · th","👄"),W("round","圆的","r · ou · nd","⭕")]),
+      P("ue","team","/uː/ 或 /juː/","ue 常在单词末尾，发长长的 u/oo 音。",C.blue,[W("blue","蓝色","bl · ue","🔵"),W("glue","胶水","gl · ue","🧴"),W("clue","线索","cl · ue","🔎"),W("true","真的","tr · ue","✅"),W("Tuesday","星期二","T · ue · sday","📅")])
+    ];
+
+    const ERROR_TYPES={
+      shape:{id:"shape",label:"字形混淆",icon:"👀",child:"眼睛把两个长得很像的字母或单词看成了一样。",method:"用手指慢慢圈出元音组合，再从左到右比一遍不同的字母。"},
+      sound:{id:"sound",label:"声音混淆",icon:"👂",child:"耳朵听到了相近的元音声音，一时没有分清。",method:"慢速再听，只盯住单词中间的元音声音，然后对比两个选项。"},
+      initial:{id:"initial",label:"首音混淆",icon:"🚂",child:"中间和后面已经听得很接近，只是开头的第一个声音跑掉了。",method:"先听单词开头，停一下，再把后面的声音接回来。"},
+      final:{id:"final",label:"尾音混淆",icon:"🚪",child:"开头听对了，但最后一个声音没有听清。",method:"把单词拉慢，特别留意嘴巴最后收住的那个声音。"},
+      rule:{id:"rule",label:"规则不熟",icon:"📖",child:"字母都看见了，只是还没有熟练使用这条发音规则。",method:"先圈出元音小队，再说出它的常见声音，最后放回完整单词。"},
+      rapid:{id:"rapid",label:"快速乱猜",icon:"✋",child:"小手比耳朵跑得快，还没看完、听完就先点了答案。",method:"先把手放在胸前，听完或读完题目，再用手指选择。"},
+      multi:{id:"multi",label:"多音组合混淆",icon:"🎭",child:"这个字母组合会“变声”，不能只看字母样子猜声音。",method:"先听完整单词判断它这次发哪个音，再把这个读音和单词一起记。"}
+    };
+    const SOUND_FAMILY={a_e:"long-a",ai:"long-a",ay:"long-a",ee:"long-e",ea:"long-e",i_e:"long-i",o_e:"long-o",oa:"long-o",ow:"long-o",u_e:"long-u",ew:"long-u",ue:"long-u",oo:"long-u",oi:"oi",oy:"oi",er:"r-mid",ir:"r-mid",ur:"r-mid"};
+    const MULTI_SOUND=new Set(["ow","oo","ea","ou","u_e","ew","ue"]);
+    function editDistance(a,b){
+      const row=Array.from({length:b.length+1},(_,i)=>i);
+      for(let i=1;i<=a.length;i++){let prev=row[0];row[0]=i;for(let j=1;j<=b.length;j++){const old=row[j];row[j]=Math.min(row[j]+1,row[j-1]+1,prev+(a[i-1]===b[j-1]?0:1));prev=old}}
+      return row[b.length]
+    }
+    function classifyError(q,selected,elapsed){
+      const answer=q.answer.w.toLowerCase(),choice=(selected?.w||"").toLowerCase(),selectedPid=selected?.pid||"",listenNotFinished=q.type==="listen"&&(q.listenCount||0)===0;
+      let type;
+      if(elapsed<650||(listenNotFinished&&elapsed<1200))type=ERROR_TYPES.rapid;
+      else if(MULTI_SOUND.has(q.p.id)&&selectedPid===q.p.id)type=ERROR_TYPES.multi;
+      else if(answer.length===choice.length&&answer.slice(1)===choice.slice(1)&&answer[0]!==choice[0])type=ERROR_TYPES.initial;
+      else if(answer.length===choice.length&&answer.slice(0,-1)===choice.slice(0,-1)&&answer.at(-1)!==choice.at(-1))type=ERROR_TYPES.final;
+      else if(selectedPid&&(selectedPid===q.p.id||SOUND_FAMILY[selectedPid]&&SOUND_FAMILY[selectedPid]===SOUND_FAMILY[q.p.id]))type=ERROR_TYPES.sound;
+      else if(selectedPid&&((q.type==="pattern"&&editDistance(q.p.id,selectedPid)<=1)||editDistance(answer,choice)<=1))type=ERROR_TYPES.shape;
+      else if(MULTI_SOUND.has(q.p.id))type=ERROR_TYPES.multi;
+      else if(q.type==="pattern")type=ERROR_TYPES.rule;
+      else type=ERROR_TYPES.sound;
+      return {...type,elapsed,answer,choice}
+    }
+
+    const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+    const PROGRESS_KEY="vowelMagicProgressV2",WRONG_KEY="vowelWrongBookV1",DAY=86400000;
+    const safeGet=(key,fallback)=>{try{const v=localStorage.getItem(key);return v===null?fallback:JSON.parse(v)}catch{return fallback}};
+    const safeSet=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value))}catch{}};
+    const todayKey=()=>{const d=new Date(),p=n=>String(n).padStart(2,"0");return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`};
+    function loadProgress(){
+      const saved=safeGet(PROGRESS_KEY,{});
+      patterns.forEach(p=>saved[p.id]??={status:"unseen",seenWords:[],exposures:0,correct:0,wrong:0,level:1,lastStudied:0,reviewAt:0});
+      return saved
+    }
+    function loadWrongBook(){
+      const saved=safeGet(WRONG_KEY,{entries:{},gems:[]});
+      saved.entries??={};saved.gems??=[];
+      Object.values(saved.entries).forEach(e=>{e.repair??={listened:false,foundPattern:false,produced:false,laterPassed:false};e.errorType??="unknown";e.errorLabel??="待重新判断";e.errorCounts??={}});
+      return saved
+    }
+    const state={cat:"short",pattern:"a",word:0,mode:"learn",sound:true,active:false,stars:safeGet("vowelStars",0),game:null,daily:null,progress:loadProgress(),wrongBook:loadWrongBook()};
+    let audioCtx,toastTimer;
+
+    function saveProgress(){safeSet(PROGRESS_KEY,state.progress)}
+    function saveWrongBook(){safeSet(WRONG_KEY,state.wrongBook);updateWrongBookBadge()}
+    function progressOf(pid){return state.progress[pid]}
+    function markExposure(pid,word){
+      if(!state.active)return;const pr=progressOf(pid);
+      if(!pr.seenWords.includes(word)){pr.seenWords.push(word);pr.exposures++;pr.status="learning"}
+      pr.lastStudied=Date.now();saveProgress()
+    }
+    function recordAnswer(pid,correct){
+      const pr=progressOf(pid);correct?pr.correct++:pr.wrong++;pr.lastStudied=Date.now();
+      if(!correct)pr.reviewAt=Date.now()+DAY;
+      const attempts=pr.correct+pr.wrong,accuracy=attempts?pr.correct/attempts:0;
+      if(pr.correct>=4&&pr.seenWords.length>=3&&accuracy>=.7){pr.status="mastered";pr.level=Math.min(6,Math.max(pr.level,3))}
+      else if(pr.exposures>0)pr.status="learning";
+      saveProgress();renderPatterns();updateStars()
+    }
+    function learnedPatterns(){return patterns.filter(p=>progressOf(p.id).status!=="unseen")}
+    function wrongEntries(activeOnly=true){
+      return Object.values(state.wrongBook.entries).filter(e=>!activeOnly||e.status!=="gem")
+    }
+    function findWord(word){
+      for(const p of patterns){const w=p.words.find(x=>x.w===word);if(w)return {...w,pid:p.id,color:p.color}}
+      return null
+    }
+    function wrongId(q){return `${q.p.id}|${q.answer.w}|${q.type}`}
+    function childWrongReason(p,answer,selected,diagnosis){
+      if(diagnosis)return `${diagnosis.child} ${diagnosis.method}`;
+      if(!selected)return `先听 ${answer.w}，再找中间的 ${p.id.replace("_","–")} 声音。`;
+      if(selected.pid===p.id)return `你已经听到同一个元音小队了，只是把相似的单词认错了。下次先听开头，再听结尾。`;
+      return `你把 ${selected.pid.replace("_","–")} 小队当成了 ${p.id.replace("_","–")}。先圈出元音伙伴，再把整个单词慢慢合起来。`
+    }
+    function addWrongItem(q,selected,diagnosis){
+      const id=wrongId(q),now=Date.now(),old=state.wrongBook.entries[id],wasGem=old?.status==="gem";
+      const entry=old||{id,pid:q.p.id,word:q.answer.w,type:q.type,wrongCount:0,stage:0,status:"active",createdAt:now,history:[]};
+      entry.status="active";entry.wrongCount++;entry.lastWrongAt=now;entry.nextReviewAt=now;
+      entry.selectedWord=selected?.w||"";entry.selectedPid=selected?.pid||"";
+      entry.errorType=diagnosis?.id||entry.errorType||"unknown";entry.errorLabel=diagnosis?.label||entry.errorLabel||"待重新判断";entry.errorIcon=diagnosis?.icon||entry.errorIcon||"🧩";
+      entry.errorFeedback=diagnosis?.child||entry.errorFeedback||"";entry.errorMethod=diagnosis?.method||entry.errorMethod||"";
+      entry.lastResponseMs=diagnosis?.elapsed??entry.lastResponseMs??null;
+      entry.errorCounts??={};entry.errorCounts[entry.errorType]=(entry.errorCounts[entry.errorType]||0)+1;
+      entry.childReason=childWrongReason(q.p,q.answer,selected,diagnosis);
+      entry.repair={listened:false,foundPattern:false,produced:false,laterPassed:false};
+      entry.history=[...(entry.history||[]),{at:now,selectedWord:entry.selectedWord,selectedPid:entry.selectedPid,errorType:entry.errorType,responseMs:entry.lastResponseMs}].slice(-8);
+      if(wasGem)entry.stage=0;else if(old)entry.stage=Math.max(0,(entry.stage||0)-1);
+      state.wrongBook.entries[id]=entry;saveWrongBook();
+      return entry
+    }
+    function repairReady(entry){
+      return !!(entry?.repair?.listened&&entry.repair.foundPattern&&entry.repair.produced)
+    }
+    function resolveWrongReview(q,independent){
+      if(!q.wrongBookId||!independent)return {gem:false,cleared:false};
+      const entry=state.wrongBook.entries[q.wrongBookId];if(!entry||entry.status==="gem")return {gem:false,cleared:false};
+      entry.repair??={listened:false,foundPattern:false,produced:false,laterPassed:false};
+      if(!repairReady(entry))return {gem:false,cleared:false,needsRepair:true,entry};
+      entry.repair.laterPassed=true;entry.lastConfirmedAt=Date.now();
+      if((entry.nextReviewAt||0)>Date.now()){saveWrongBook();return {gem:false,cleared:false,consolidated:true,entry}}
+      entry.stage=(entry.stage||0)+1;entry.lastReviewAt=Date.now();
+      if(entry.stage>=3){
+        entry.stage=3;entry.status="gem";entry.gemAt=Date.now();entry.nextReviewAt=0;
+        state.stars++;safeSet("vowelStars",state.stars);updateStars()
+      }else{
+        const interval=entry.stage===1?DAY:3*DAY;
+        entry.nextReviewAt=Date.now()+interval
+      }
+      saveWrongBook();
+      return {gem:entry.status==="gem",cleared:wrongEntries().length===0,entry}
+    }
+    function dueWrongEntries(){
+      const now=Date.now();return wrongEntries().filter(e=>(e.nextReviewAt||0)<=now)
+    }
+    function reviewLabel(time){
+      if(!time||time<=Date.now())return "现在复习";
+      const days=Math.ceil((time-Date.now())/DAY);
+      if(days===1)return "明天复习";
+      if(days<=7)return `${days}天后复习`;
+      const d=new Date(time);return `${d.getMonth()+1}月${d.getDate()}日复习`
+    }
+    function weaknessData(){
+      return patterns.map(p=>{
+        const pr=progressOf(p.id),bookWrong=wrongEntries().filter(e=>e.pid===p.id).reduce((n,e)=>n+e.wrongCount,0);
+        const total=pr.correct+pr.wrong,accuracy=total?Math.round(pr.correct/total*100):100;
+        return {p,wrong:Math.max(pr.wrong,bookWrong),accuracy}
+      }).filter(x=>x.wrong>0).sort((a,b)=>b.wrong-a.wrong||a.accuracy-b.accuracy).slice(0,4)
+    }
+    function confusionData(){
+      const map={};
+      wrongEntries(false).forEach(e=>{
+        if(!e.selectedPid||e.selectedPid===e.pid)return;
+        const key=[e.pid,e.selectedPid].sort().join("|");
+        map[key]=(map[key]||0)+e.wrongCount
+      });
+      return Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,3)
+    }
+    function errorTypeData(){
+      const counts={};wrongEntries(false).forEach(e=>Object.entries(e.errorCounts||{}).forEach(([k,n])=>counts[k]=(counts[k]||0)+n));
+      return Object.entries(counts).filter(([k])=>ERROR_TYPES[k]).sort((a,b)=>b[1]-a[1]).slice(0,4)
+    }
+    function updateWrongBookBadge(){
+      const badge=$("#wrongBookCount");if(!badge)return;const due=dueWrongEntries().length,active=wrongEntries().length;
+      badge.textContent=due?String(due):active?String(active):""
+    }
+    function renderWrongBook(){
+      const active=wrongEntries().sort((a,b)=>(a.nextReviewAt||0)-(b.nextReviewAt||0)||b.wrongCount-a.wrongCount);
+      const due=dueWrongEntries().length,gems=wrongEntries(false).filter(e=>e.status==="gem").sort((a,b)=>b.gemAt-a.gemAt);
+      const weak=weaknessData(),confusions=confusionData(),errorTypes=errorTypeData();
+      const weaknessHtml=weak.length||confusions.length||errorTypes.length?`<section class="weakness-panel">
+        <h3>🧭 我的薄弱点地图</h3>
+        <p>错得多不代表不会，它只是告诉我们：下一次把注意力放在哪里。</p>
+        <div class="weak-chips">
+          ${weak.map(x=>`<span class="weak-chip"><b>${x.p.id.replace("_","–")}</b> · ${x.wrong}次迷糊 · 正确率${x.accuracy}%</span>`).join("")}
+          ${confusions.map(([key,n])=>`<span class="weak-chip">易混淆 <b>${key.split("|").map(x=>x.replace("_","–")).join(" ↔ ")}</b> · ${n}次</span>`).join("")}
+          ${errorTypes.map(([key,n])=>`<span class="weak-chip">${ERROR_TYPES[key].icon} 常见错误 <b>${ERROR_TYPES[key].label}</b> · ${n}次</span>`).join("")}
+        </div>
+      </section>`:"";
+      const listHtml=active.length?`<div class="wrong-list">${active.map(e=>{
+        const p=patterns.find(x=>x.id===e.pid),answer=p.words.find(w=>w.w===e.word),selected=findWord(e.selectedWord),isDue=(e.nextReviewAt||0)<=Date.now();
+        const selectedText=selected?`上次把 <b>${selected.w}</b> 当成了 <b>${answer.w}</b>`:"上次还没有找到正确的声音线索";
+        return `<article class="wrong-card ${isDue?"due":""}">
+          <div class="stone-orb" aria-label="等待炼化的灰色魔法石">🪨</div>
+          <div class="wrong-card-top">
+            <div><div class="wrong-word">${markFocus(answer.w,p.id)} <small>${answer.emoji}</small></div><span class="wrong-pattern" style="--pc:${p.color}">${p.id.replace("_","–")} · ${p.sound}</span></div>
+            <span class="review-chip ${isDue?"now":""}">${reviewLabel(e.nextReviewAt)}</span>
+          </div>
+          <div class="kid-reason">🧒 ${e.childReason||childWrongReason(p,answer,selected)}</div>
+          <span class="error-type-chip">${e.errorIcon||"🧩"} 系统判断：${e.errorLabel||"待重新判断"}</span>
+          <div class="wrong-compare">❌ ${selectedText}<br>✅ <b>${answer.split}</b> → ${answer.w}</div>
+          <details class="detail-toggle">
+            <summary>🔍 看发音方法</summary>
+            <div style="padding:0 12px 12px;font-size:12px;line-height:1.6;color:#e2e5ff">${p.cue}<div class="memory"><span>💡</span><div><b>记忆口诀</b>${memoryTip(p.cat)}</div></div></div>
+          </details>
+          <div class="alchemy-steps" aria-label="炼金进度 ${e.stage||0}/3">${[1,2,3].map(n=>`<i class="${(e.stage||0)>=n?"on":""}"></i>`).join("")}</div>
+          <div class="alchemy-label">修复任务：${e.repair?.listened&&e.repair?.foundPattern&&e.repair?.produced?"前三步已完成":"等待完成听、找、拼/读"} · ${e.repair?.laterPassed?"已在稍后答对":"等待稍后回访"}<br>再按计划独立答对 ${3-(e.stage||0)} 次，灰色魔法石就会变成彩色宝石</div>
+        </article>`
+      }).join("")}</div>`:`<div class="book-empty"><div class="big">${gems.length?"💎":"🌟"}</div><h3>${gems.length?"迷糊石都炼成宝石啦！":"还没有迷糊石"}</h3><p>${gems.length?"你已经把曾经不会的地方变成了真正的本领。":"去完成轻松挑战，遇到不熟悉的声音时，魔法书会温柔地帮你记下来。"}</p></div>`;
+      const gemHtml=gems.length?`<section class="weakness-panel" style="margin-top:14px"><h3>💎 我的魔法宝石</h3><p>每颗宝石都来自“不会 → 复习 → 真正学会”。</p><div class="gem-shelf">${gems.slice(0,16).map(e=>`<span class="gem-item">💎 ${e.word} · ${e.pid.replace("_","–")}</span>`).join("")}</div></section>`:"";
+      return `<div class="alchemy-summary">
+          <div class="alchemy-stat due">今天待复习<strong>${due}</strong></div>
+          <div class="alchemy-stat">正在炼金<strong>${active.length}</strong></div>
+          <div class="alchemy-stat gem">魔法宝石<strong>${gems.length}</strong></div>
+        </div>${weaknessHtml}<div class="wrong-list-head"><h3>🪨 待炼成的迷糊石</h3><small>今天 → 明天 → 3天后 → 宝石</small></div>${listHtml}${gemHtml}
+        <div class="wrongbook-actions"><button class="secondary" id="bookCloseBottom">先去学习</button><button class="primary" id="practiceWrong" ${active.length?"":"disabled"}>${due?"🧪 复习今日错题":"✨ 提前巩固错题"}</button></div>`
+    }
+    function openWrongBook(){
+      if($(".wrongbook-overlay"))return;
+      tone("open");const overlay=document.createElement("div");overlay.className="wrongbook-overlay";overlay.setAttribute("role","dialog");overlay.setAttribute("aria-modal","true");overlay.setAttribute("aria-labelledby","wrongBookTitle");
+      overlay.innerHTML=`<section class="wrongbook-shell"><header class="wrongbook-head"><div class="wrongbook-title"><div class="book-glyph">📕</div><div><h2 id="wrongBookTitle">错题魔法书</h2><p>把不会的地方炼成闪闪发光的本领</p></div></div><button class="icon-btn" id="bookClose" aria-label="关闭错题魔法书">✕</button></header><div class="wrongbook-body">${renderWrongBook()}</div></section>`;
+      document.body.appendChild(overlay);requestAnimationFrame(()=>overlay.classList.add("show"));
+      const close=()=>{overlay.classList.remove("show");setTimeout(()=>overlay.remove(),240)};
+      $("#bookClose").onclick=close;$("#bookCloseBottom").onclick=close;
+      $("#practiceWrong").onclick=()=>{if(!wrongEntries().length)return;close();$("#welcome").classList.add("closed");switchMode("challenge");setTimeout(()=>startGame(false,true),260)};
+      setTimeout(()=>$("#bookClose")?.focus(),300)
+    }
+    function showClearCelebration(){
+      const overlay=document.createElement("div");overlay.className="welcome clear-celebration";
+      overlay.innerHTML=`<div class="welcome-card"><div class="welcome-icon">💎</div><h2>迷糊石<span>全部炼成宝石啦！</span></h2><p>你没有躲开不会的地方，而是一次次回来练习。<br>这才是真正厉害的学习魔法！</p><div class="result-stars">★★★</div><button class="primary" id="clearCelebrateDone">收下宝石 ✨</button></div>`;
+      document.body.appendChild(overlay);tone("combo");
+      for(let i=0;i<5;i++)setTimeout(()=>burst(overlay.querySelector(".welcome-icon")),i*180);
+      $("#clearCelebrateDone").onclick=()=>overlay.remove()
+    }
+    function showGemTransform(entry){
+      const flash=document.createElement("div");flash.className="gem-transform";flash.innerHTML=`<div class="morph">🪨<span style="display:none">💎</span></div><strong>${entry.word} 炼成彩色宝石！💎</strong>`;document.body.appendChild(flash);
+      setTimeout(()=>{const m=flash.querySelector(".morph");if(m)m.textContent="💎"},620);setTimeout(()=>flash.remove(),1500)
+    }
+    function createStars(){
+      const f=document.createDocumentFragment();
+      for(let i=0;i<90;i++){const s=document.createElement("i");s.className="star";s.style.left=Math.random()*100+"%";s.style.top=Math.random()*100+"%";s.style.setProperty("--d",(2+Math.random()*4)+"s");s.style.setProperty("--o",(.18+Math.random()*.7).toFixed(2));s.style.animationDelay=(-Math.random()*5)+"s";f.appendChild(s)}
+      $("#stars").appendChild(f);
+    }
+    function initAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)()}
+    function tone(kind="click"){
+      if(!state.sound)return;initAudio();const now=audioCtx.currentTime;
+      const map={click:[520,.05,"sine"],correct:[660,.08,"sine"],wrong:[230,.1,"sine"],combo:[880,.07,"triangle"],open:[392,.12,"sine"]};
+      const [freq,dur,type]=map[kind];const notes=kind==="correct"?[1,1.25,1.5]:kind==="open"?[1,1.5,2]:[1];
+      notes.forEach((n,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.setValueAtTime(freq*n,now+i*.075);g.gain.setValueAtTime(.0001,now+i*.075);g.gain.exponentialRampToValueAtTime(.12,now+i*.075+.012);g.gain.exponentialRampToValueAtTime(.0001,now+i*.075+dur);o.connect(g).connect(audioCtx.destination);o.start(now+i*.075);o.stop(now+i*.075+dur+.02)})
+    }
+    function speak(text,rate=.82){
+      if(!("speechSynthesis" in window)){showToast("这台设备暂不支持语音朗读");return}
+      speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang="en-US";u.rate=rate;u.pitch=1.05;
+      const voices=speechSynthesis.getVoices();u.voice=voices.find(v=>v.lang==="en-US"&&/Samantha|Google|Microsoft|English/i.test(v.name))||voices.find(v=>v.lang.startsWith("en"))||null;
+      speechSynthesis.speak(u);
+    }
+    function playQuestionAudio(q,rate=.78){if(q)q.listenCount=(q.listenCount||0)+1;speak(q.answer.w,rate)}
+    function showToast(msg){clearTimeout(toastTimer);$("#toast").textContent=msg;$("#toast").classList.add("show");toastTimer=setTimeout(()=>$("#toast").classList.remove("show"),1900)}
+    function renderCategories(){
+      $("#categoryList").innerHTML=categories.map(c=>`<button class="category-btn ${c.id===state.cat?"active":""}" data-cat="${c.id}"><span class="cat-icon">${c.icon}</span><span><strong>${c.name}</strong><small>${c.sub}</small></span></button>`).join("");
+      $$(".category-btn").forEach(b=>b.onclick=()=>{tone();state.daily=null;state.cat=b.dataset.cat;state.pattern=patterns.find(p=>p.cat===state.cat).id;state.word=0;switchMode("learn");renderAll()})
+    }
+    function renderPatterns(){
+      $("#patternGrid").innerHTML=patterns.map(p=>{const pr=progressOf(p.id),badge=pr.status==="mastered"?"✓":pr.status==="learning"?"•":"";return `<button class="pattern-btn ${p.id===state.pattern?"active":""}" data-id="${p.id}" style="--c:${p.color}" aria-label="学习 ${p.id}" title="${pr.status==="mastered"?"已掌握":pr.status==="learning"?"学习中":"未学习"}">${p.id.replace("_","–")}<sup>${badge}</sup></button>`}).join("");
+      $$(".pattern-btn").forEach(b=>b.onclick=()=>{tone();state.daily=null;const p=patterns.find(x=>x.id===b.dataset.id);state.pattern=p.id;state.cat=p.cat;state.word=0;switchMode("learn");renderAll()})
+    }
+    function markFocus(word,id){
+      const clean=id.replace("_","");
+      if(id.includes("_")){const [a,e]=id.split("_");const first=word.indexOf(a),last=word.lastIndexOf(e);if(first>=0&&last>first)return word.slice(0,first)+`<span class="focus">${word[first]}</span>`+word.slice(first+1,last)+`<span class="focus">${word[last]}</span>`+word.slice(last+1)}
+      const i=word.toLowerCase().indexOf(clean);return i<0?word:word.slice(0,i)+`<span class="focus">${word.slice(i,i+clean.length)}</span>`+word.slice(i+clean.length)
+    }
+    function renderLesson(){
+      const p=patterns.find(x=>x.id===state.pattern),w=p.words[state.word];
+      $("#crumb").textContent=state.daily?`今日5分钟 · ${state.daily.index+1}/${state.daily.items.length}`:categories.find(c=>c.id===p.cat).name+" · "+p.id.replace("_","–");
+      $("#patternOrb").textContent=p.id.replace("_","–");$("#patternOrb").style.setProperty("--pattern",p.color);
+      $("#soundLabel").textContent=p.sound;$("#word").innerHTML=markFocus(w.w,p.id);
+      $("#phonics").textContent=w.split+" → "+w.w;$("#meaning").textContent=w.emoji+" "+w.zh;$("#cue").textContent=p.cue;
+      const current=state.daily?state.daily.index+1:state.word+1,total=state.daily?state.daily.items.length:p.words.length;
+      $("#progressText").textContent=current+"/"+total;$("#progressBar").style.width=(current/total*100)+"%";
+      $("#wordDots").innerHTML=Array.from({length:Math.min(total,9)},(_,i)=>`<i class="${Math.round((current-1)/(Math.max(1,total-1))*(Math.min(total,9)-1))===i?"active":""}"></i>`).join("");
+      $("#nextBtn").textContent=state.daily?(current===total?"完成今日课 ✨":"完成本步 →"):"下一个 →";
+      markExposure(p.id,w.w);updateStars()
+    }
+    function updateStars(){
+      $("#totalStars").textContent=state.stars;const learned=learnedPatterns().length,mastered=patterns.filter(p=>progressOf(p.id).status==="mastered").length;
+      $("#learnCount").textContent=learned+" 个组合已学习";const n=Math.min(5,mastered);$("#starDisplay").textContent="★".repeat(n)+"☆".repeat(5-n)
+    }
+    function buildDailyItems(){
+      const today=todayKey(),saved=safeGet("vowelDailyPlan",null);
+      if(saved?.date===today&&Array.isArray(saved.items)&&saved.items.length)return saved.items;
+      const unseen=patterns.find(p=>progressOf(p.id).status==="unseen"),newP=unseen||patterns.slice().sort((a,b)=>progressOf(a.id).lastStudied-progressOf(b.id).lastStudied)[0];
+      const reviews=learnedPatterns().filter(p=>p.id!==newP.id).sort((a,b)=>(progressOf(a.id).reviewAt||0)-(progressOf(b.id).reviewAt||0)).slice(0,2);
+      const items=newP.words.slice(0,3).map((_,i)=>({pid:newP.id,wi:i,new:true}));
+      reviews.forEach((p,ri)=>p.words.slice(0,2).forEach((_,i)=>items.push({pid:p.id,wi:i,review:true})));
+      let fill=0;while(items.length<7){items.push({pid:newP.id,wi:fill%newP.words.length,review:true});fill++}
+      safeSet("vowelDailyPlan",{date:today,items});
+      return items
+    }
+    function refreshHome(){
+      const today=todayKey(),done=safeGet("vowelDailyDate","")===today;
+      $(".daily-badge").textContent=done?"✅ 今日已完成 · 可以轻松复习":"🌱 初学者友好 · 不限时";
+      $("#enterBtn").textContent=done?"↻ 再复习一次":"▶ 开始今日魔法课"
+    }
+    function startDailyLesson(){
+      clearGame();state.active=true;state.daily={items:buildDailyItems(),index:0};switchMode("learn");showDailyItem();tone("open");setTimeout(()=>{const p=patterns.find(x=>x.id===state.pattern);speak(p.words[state.word].w,.82)},260)
+    }
+    function showDailyItem(){
+      const item=state.daily.items[state.daily.index],p=patterns.find(x=>x.id===item.pid);state.pattern=p.id;state.cat=p.cat;state.word=item.wi;renderAll()
+    }
+    function finishDaily(){
+      const today=todayKey(),already=safeGet("vowelDailyDate","");
+      if(already!==today){state.stars++;safeSet("vowelStars",state.stars);safeSet("vowelDailyDate",today)}
+      state.daily=null;updateStars();tone("correct");
+      const overlay=document.createElement("div");overlay.className="welcome";overlay.innerHTML=`<div class="welcome-card"><div class="welcome-icon">🌟</div><h2>今天的魔法课<span>完成啦！</span></h2><p>你完成了新知识和轻松复习。今天的学习已经足够，可以开心地休息。</p><div class="welcome-actions"><button class="primary" id="dailyChallenge">去轻松挑战</button><button class="secondary" id="dailyClose">收下星星</button></div></div>`;document.body.appendChild(overlay);
+      $("#dailyChallenge").onclick=()=>{overlay.remove();switchMode("challenge")};$("#dailyClose").onclick=()=>overlay.remove()
+    }
+    function nextWord(){
+      tone();if(state.daily){if(state.daily.index>=state.daily.items.length-1){finishDaily();return}state.daily.index++;showDailyItem();return}
+      const p=patterns.find(x=>x.id===state.pattern);state.word=(state.word+1)%p.words.length;renderLesson()
+    }
+    function switchMode(mode){
+      if(mode==="learn"&&state.game)clearGame();state.mode=mode;$$(".mode-btn").forEach(b=>b.classList.toggle("active",b.dataset.mode===mode));
+      if(mode==="learn"){$("#lessonContent").classList.remove("hide");$("#challenge").classList.remove("show")}
+      else{$("#lessonContent").classList.add("hide");$("#challenge").classList.add("show");renderChallengeStart()}
+    }
+    function renderChallengeStart(){
+      clearGame();const learned=learnedPatterns().length;$("#crumb").textContent="挑战大厅";$("#progressText").textContent="不限时";$("#progressBar").style.width="0";
+      $("#challenge").innerHTML=`<div class="start-card"><div class="big">🌱</div><h2>先来一场轻松练习</h2><p>默认不限时，只会练习你已经接触过的 <strong>${learned||1}</strong> 个组合。答错时会一步一步给线索，不用着急。</p><div class="card-actions"><button class="primary" id="startEasy">🌿 不限时练习</button><button class="secondary" id="startTimed">⚡ 60秒挑战</button></div></div>`;
+      $("#startEasy").onclick=()=>startGame(false);$("#startTimed").onclick=()=>startGame(true)
+    }
+    function startGame(timed=false,wrongOnly=false){
+      const duePool=wrongOnly?dueWrongEntries():[],earlyPractice=wrongOnly&&duePool.length===0;
+      const wrongPool=wrongOnly?(duePool.length?duePool:wrongEntries()).sort((a,b)=>(a.nextReviewAt||0)-(b.nextReviewAt||0)).slice(0,8):[];
+      if(wrongOnly&&!wrongPool.length){showToast("现在没有需要复习的迷糊石");openWrongBook();return}
+      tone("open");state.active=true;state.daily=null;state.game={timed:wrongOnly?false:timed,startedTimed:timed&&!wrongOnly,wrongOnly,earlyPractice,time:timed&&!wrongOnly?60:null,goal:wrongOnly?wrongPool.length:timed?Infinity:8,answered:0,correct:0,score:0,combo:0,best:0,energy:0,q:null,timer:null,locked:false,paused:false,failStreak:0,recoveryPending:false,reviewQueue:[],endReviewQueue:[],sessionWrongIds:[],forceReviewWrap:false,wrongQueue:wrongPool.map(e=>e.id),allCleared:false};
+      if(state.game.timed)state.game.timer=setInterval(tick,1000);nextQuestion()
+    }
+    function tick(){
+      if(!state.game||!state.game.timed||state.game.paused)return;state.game.time--;const t=$("#gameTime");if(t)t.textContent=state.game.time+"s";
+      $("#progressBar").style.width=(state.game.time/60*100)+"%";
+      if(state.game.time<=0){
+        const g=state.game;
+        if(g.reviewQueue.length||g.endReviewQueue.length){
+          clearInterval(g.timer);g.timer=null;g.timed=false;g.forceReviewWrap=true;g.recoveryPending=false;g.goal=g.answered+g.reviewQueue.length+g.endReviewQueue.length;nextQuestion()
+        }else finishGame()
+      }
+    }
+    function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
+    function eligibleWords(){return learnedPatterns().flatMap(p=>p.words.map(w=>({...w,pid:p.id,color:p.color})))}
+    function buildOptions(p,answer,type,count=4){
+      const all=eligibleWords().filter(x=>x.w!==answer.w&&(type==="listen"||x.pid!==p.id));
+      const fallback=patterns.filter(x=>progressOf(x.id).status!=="unseen").flatMap(x=>x.words.map(w=>({...w,pid:x.id,color:x.color}))).filter(x=>x.w!==answer.w);
+      const wrong=shuffle(all.length>=count-1?all:fallback).filter((x,i,a)=>a.findIndex(y=>y.w===x.w)===i).slice(0,count-1);
+      return shuffle([{...answer,pid:p.id,color:p.color},...wrong])
+    }
+    function makeQuestion(p,answer,type,extra={}){
+      if(type==="pattern"&&learnedPatterns().length<2)type="listen";
+      const count=extra.recovery?2:4,opts=buildOptions(p,answer,type,count),preferred=findWord(extra.preferredWrong);
+      if(preferred&&preferred.w!==answer.w&&!opts.some(o=>o.w===preferred.w)){
+        const replaceAt=opts.findIndex(o=>o.w!==answer.w);if(replaceAt>=0)opts[replaceAt]=preferred;else opts.push(preferred)
+      }
+      return {p,answer,type,opts,allOpts:[...opts],attempts:0,eliminated:[],hint:extra.recovery?"这是一道你熟悉的恢复题，慢慢听就能找到答案。":"",queued:false,recovery:!!extra.recovery,reviewing:!!extra.reviewing,visitPhase:extra.visitPhase||"",wrongBookId:extra.wrongBookId||"",shownAt:0,listenCount:0,diagnosis:null}
+    }
+    function makeReviewQuestion(r,phase){
+      const p=patterns.find(x=>x.id===r.pid),answer=p.words.find(w=>w.w===r.word);
+      return makeQuestion(p,answer,r.type,{reviewing:true,visitPhase:phase,wrongBookId:r.wrongBookId,preferredWrong:r.selectedWord})
+    }
+    function nextQuestion(){
+      const g=state.game;if(!g)return;
+      if(!g.timed&&g.answered>=g.goal&&!g.forceReviewWrap&&!g.reviewQueue.length&&!g.endReviewQueue.length){finishGame();return}
+      g.locked=false;let q;
+      if(g.wrongOnly){
+        const id=g.wrongQueue.shift();if(!id){finishGame();return}const entry=state.wrongBook.entries[id];
+        if(!entry||entry.status==="gem"){g.goal=Math.max(g.answered,g.goal-1);nextQuestion();return}
+        const p=patterns.find(x=>x.id===entry.pid),answer=p.words.find(w=>w.w===entry.word);
+        q=makeQuestion(p,answer,entry.type||"listen",{reviewing:true,visitPhase:"spaced",wrongBookId:id,preferredWrong:entry.selectedWord});q.repairFirst=!repairReady(entry)
+      }else{
+        const dueIndex=g.reviewQueue.findIndex(r=>r.due<=g.answered);
+        if(g.forceReviewWrap&&g.reviewQueue.length)q=makeReviewQuestion(g.reviewQueue.shift(),"soon");
+        else if(dueIndex>=0)q=makeReviewQuestion(g.reviewQueue.splice(dueIndex,1)[0],"soon");
+        else if(g.endReviewQueue.length&&(g.forceReviewWrap||g.answered>=g.goal-g.endReviewQueue.length))q=makeReviewQuestion(g.endReviewQueue.shift(),"final");
+        else if(g.forceReviewWrap){finishGame();return}
+        else if(g.recoveryPending){
+          const p=learnedPatterns().find(x=>x.cat==="short")||learnedPatterns()[0]||patterns[0];q=makeQuestion(p,p.words[0],"listen",{recovery:true});g.recoveryPending=false
+        }else{const pool=learnedPatterns().length?learnedPatterns():[patterns[0]],p=pool[Math.floor(Math.random()*pool.length)],answer=p.words[Math.floor(Math.random()*p.words.length)],type=Math.random()<.52?"pattern":"listen";q=makeQuestion(p,answer,type)}
+      }
+      g.q=q;renderQuestion();
+      if(q.repairFirst){
+        g.locked=true;g.paused=true;const entry=state.wrongBook.entries[q.wrongBookId],selected=findWord(entry?.selectedWord)||q.allOpts.find(o=>o.w!==q.answer.w);
+        setTimeout(()=>showFeedback(selected,false,true),260);return
+      }
+      if(q.type==="listen")setTimeout(()=>{if(state.game?.q===q)playQuestionAudio(q,.78)},240)
+    }
+    function renderQuestion(){
+      const g=state.game,q=g.q;if(!q.shownAt)q.shownAt=Date.now();$("#crumb").textContent=g.wrongOnly?"错题炼金试炼":q.recovery?"暖心恢复题":q.visitPhase==="soon"?"2～3题后回访":q.visitPhase==="final"?"本轮结束前确认":q.reviewing?"错题回访":"声音试炼进行中";
+      const firstLabel=g.timed?"剩余时间":"完成进度",firstValue=g.timed?g.time+"s":g.answered+"/"+g.goal;
+      $("#challenge").innerHTML=`<div class="challenge-top"><div class="stat">${firstLabel}<strong id="gameTime">${firstValue}</strong></div><div class="stat">魔法分数<strong id="gameScore">${g.score}</strong></div><div class="stat">当前连击<strong id="gameCombo">×${g.combo}</strong></div><div class="stat">成长能量<strong id="gameEnergy">+${g.energy}</strong></div></div>
+        ${q.shieldUsed?`<div class="shield-notice">🛡️ 魔法护盾保住了 ×${q.shieldSaved} 连击，没有全部归零</div>`:""}
+        ${g.wrongOnly?(g.earlyPractice?'<div class="recovery-flag">🌱 提前巩固，不跳过记忆间隔</div>':'<div class="recovery-flag">🧪 按记忆计划回来确认</div>'):q.recovery?'<div class="recovery-flag">🌿 先收集一颗熟悉的星星</div>':q.visitPhase==="soon"?'<div class="recovery-flag">🔁 过了2～3题，现在自己再试一次</div>':q.visitPhase==="final"?'<div class="recovery-flag">🛡️ 离开本轮前，再确认一次记牢了</div>':q.reviewing?'<div class="recovery-flag">🔁 这颗迷糊石回来复习啦</div>':""}
+        <div class="challenge-type">${q.type==="listen"?"听音辨词":"寻找字母组合"}</div>
+        <div class="question">${q.type==="listen"?"听一听，选出你听到的单词":`哪个单词里藏着 <span class="target">${q.p.id.replace("_","–")}</span>？`}</div>
+        ${q.type==="listen"?'<button class="listen-big" id="listenQ" aria-label="重听单词">🔊</button>':`<div class="cue">${q.p.sound} · ${q.p.cue}</div>`}
+        <div class="options">${q.opts.map((o,i)=>`<button class="option ${q.eliminated.includes(o.w)?"soft-disabled":""}" data-word="${o.w}" ${q.eliminated.includes(o.w)?"disabled":""}><small>${i+1}</small> ${o.w}</button>`).join("")}</div>
+        <div class="challenge-hint" id="challengeHint">${q.hint}</div><div class="combo-pop" id="comboPop">${g.combo>=2?"🔥 "+g.combo+" 连击！":""}</div>`;
+      if($("#listenQ"))$("#listenQ").onclick=()=>playQuestionAudio(q,.7);$$(".option").forEach(b=>b.onclick=()=>answerQuestion(b,b.dataset.word===q.answer.w))
+    }
+    function syncGameStats(g){
+      if($("#gameScore"))$("#gameScore").textContent=g.score;if($("#gameCombo"))$("#gameCombo").textContent="×"+g.combo;if($("#gameEnergy"))$("#gameEnergy").textContent="+"+g.energy
+    }
+    function firstHint(q){
+      if(q.diagnosis)return `${q.diagnosis.icon} <b>${q.diagnosis.label}</b>：${q.diagnosis.child}<br>✨ ${q.diagnosis.method}`;
+      return q.type==="listen"?"👂 先听第一个声音，再听单词中间的元音。":`🔎 先只看每个单词的元音小队，寻找 ${q.p.id.replace("_","–")}。`
+    }
+    function scheduleReview(q){
+      const g=state.game;if(q.queued)return;q.queued=true;const id=wrongId(q),due=g.answered+3+Math.floor(Math.random()*2),entry=state.wrongBook.entries[id],review={pid:q.p.id,word:q.answer.w,type:q.type,due,wrongBookId:id,selectedWord:entry?.selectedWord||""};
+      if(!g.reviewQueue.some(r=>r.wrongBookId===id))g.reviewQueue.push(review);
+      if(!g.endReviewQueue.some(r=>r.wrongBookId===id))g.endReviewQueue.push({...review,due:Infinity});
+      if(!g.sessionWrongIds.includes(id))g.sessionWrongIds.push(id);
+      if(!g.timed)g.goal=Math.min(14,Math.max(g.goal+1,due+2));
+      const pr=progressOf(q.p.id);pr.reviewAt=Date.now()+DAY;saveProgress()
+    }
+    function reduceToTwo(q){
+      const answer=q.allOpts.find(o=>o.w===q.answer.w),other=q.allOpts.find(o=>o.w!==q.answer.w&&!q.eliminated.includes(o.w))||q.allOpts.find(o=>o.w!==q.answer.w);
+      q.opts=shuffle([answer,other]);q.eliminated=[];q.hint="✨ 我帮你关掉两扇门。现在只剩两个选项，再听一次。"
+    }
+    function answerQuestion(btn,ok){
+      const g=state.game,q=g?.q;if(!g||g.locked)return;
+      if(ok){
+        g.locked=true;g.correct++;
+        if(q.attempts){g.combo=Math.max(g.combo,q.comboBefore||0)+1;g.energy+=3;q.selfCorrected=true}
+        else g.combo++;
+        g.best=Math.max(g.best,g.combo);g.score+=10+Math.max(0,g.combo-1)*2;syncGameStats(g);btn.classList.add("correct");recordAnswer(q.p.id,true);
+        const alchemy=resolveWrongReview(q,q.attempts===0&&!(g.wrongOnly&&g.earlyPractice));if(alchemy.cleared)g.allCleared=true;
+        tone(alchemy.gem||g.combo>=3?"combo":"correct");burst(btn);if(alchemy.gem)showGemTransform(alchemy.entry);
+        showToast(alchemy.gem?`${q.answer.w} 炼成魔法宝石啦！💎`:q.selfCorrected?`自我纠正成功！恢复连击并获得 +3 成长能量 ✨`:"你听清了这个声音！✨");
+        if(q.attempts){g.paused=true;setTimeout(()=>showFeedback(q.firstWrong||q.allOpts.find(o=>o.w!==q.answer.w),false),650)}
+        else setTimeout(()=>completeQuestion("correct"),alchemy.gem?900:650);
+        return
+      }
+      g.locked=true;q.attempts++;const selected=q.opts.find(o=>o.w===btn.dataset.word)||findWord(btn.dataset.word);
+      if(q.attempts===1){
+        q.firstWrong=selected;q.comboBefore=g.combo;q.shieldSaved=Math.ceil(g.combo/2);q.shieldUsed=g.combo>0;g.combo=q.shieldSaved;syncGameStats(g);
+        q.diagnosis=classifyError(q,selected,Date.now()-(q.shownAt||Date.now()));
+        recordAnswer(q.p.id,false);const wrongEntry=addWrongItem(q,selected,q.diagnosis);
+        if(g.wrongOnly&&!g.sessionWrongIds.includes(wrongEntry.id))g.sessionWrongIds.push(wrongEntry.id);
+        if(!g.wrongOnly&&!q.reviewing)scheduleReview(q)
+      }
+      btn.classList.add("wrong");tone("wrong");
+      if(q.attempts===1){
+        q.eliminated.push(btn.dataset.word);q.hint=firstHint(q);$("#challengeHint").innerHTML=q.hint;setTimeout(()=>{btn.classList.remove("wrong");btn.classList.add("soft-disabled");btn.disabled=true;g.locked=false},380);showToast(q.shieldUsed?`🛡️ 护盾保住 ×${q.shieldSaved} 连击，再试一次`:`${q.diagnosis.icon} ${q.diagnosis.label}：我们已经找到学习线索`)
+      }else if(q.attempts===2){
+        q.eliminated.push(btn.dataset.word);showToast("我们把范围缩小一点");setTimeout(()=>{reduceToTwo(q);g.locked=false;renderQuestion();if(q.type==="listen")playQuestionAudio(q,.68)},480)
+      }else{
+        g.locked=true;g.paused=true;$(".options")?.classList.add("reveal");$$(".option").find(b=>b.dataset.word===q.answer.w)?.classList.add("correct");showToast("这次我先示范，我们一起完成");setTimeout(()=>showFeedback(q.firstWrong||selected,true),600)
+      }
+    }
+    function completeQuestion(result){
+      const g=state.game,q=g?.q;if(!g||!q)return;g.answered++;
+      if(result==="correct"&&q.attempts===0){g.failStreak=0;if(q.recovery)g.recoveryPending=false}
+      else{g.failStreak++;if(g.failStreak>=2){g.recoveryPending=true;g.failStreak=0}}
+      if(!g.timed)$("#progressBar").style.width=(g.answered/g.goal*100)+"%";
+      if(!g.timed&&g.answered>=g.goal)finishGame();else nextQuestion()
+    }
+    function memoryTip(cat){
+      return {
+        short:"元音被辅音“关”在一个短音节里时，先试短音：声音短、快，不读字母名。",
+        magic:"看到“元音 + 辅音 + 结尾 e”，把三处一起圈起来：结尾 e 常安静，前面的元音常说字母名。",
+        r:"看到元音后紧跟 r，把“元音 + r”圈成一个声音小队，不要把两个字母拆开读。",
+        wy:"w 和 y 是会改变声音的特殊伙伴。先整组认 aw、ay、ew、oy、ow，再放进单词里听。",
+        team:"两个元音站在一起时，先圈成一个元音小队；先试学过的常见音，再用完整单词检查。"
+      }[cat]
+    }
+    function showFeedback(selected,shared=false,repairOnly=false){
+      const g=state.game;if(!g)return;const {p,answer,type}=g.q;
+      const selectedPattern=patterns.find(x=>x.id===selected.pid)||p;
+      const ipa=(p.sound.match(/\/[^/]+\//)||[p.sound])[0];
+      const entry=state.wrongBook.entries[g.q.wrongBookId||wrongId(g.q)],repair=entry?.repair||{listened:false,foundPattern:false,produced:false,laterPassed:false};
+      const diagnosis=g.q.diagnosis||ERROR_TYPES[entry?.errorType]||{id:"unknown",label:entry?.errorLabel||"待重新判断",icon:entry?.errorIcon||"🧩",child:entry?.errorFeedback||"这次还需要再观察一下错误线索。",method:entry?.errorMethod||"慢慢听、慢慢看，再完成一次对比。"};
+      const choiceMap=new Map([p,selectedPattern,...learnedPatterns(),...patterns.filter(x=>x.cat===p.cat)].map(x=>[x.id,x]));
+      const patternChoices=shuffle([...choiceMap.values()].slice(0,3));
+      const spellLetters=shuffle(answer.w.toLowerCase().split("").map((letter,index)=>({letter,index})));
+      const whyYes=type==="listen"
+        ?`刚才语音读的是 <b>${answer.w}</b>。慢速听时，把声音按 <b>${answer.split}</b> 分开，再合回完整单词。`
+        :`题目要寻找 <b>${p.id.replace("_","–")}</b>。在 <b>${answer.w}</b> 中，它正好对应 <b>${answer.split}</b>，所以这个单词符合题目。`;
+      const whyNo=type==="listen"&&selected.pid===p.id
+        ?`你选的 <b>${selected.w}</b> 也有 ${p.id.replace("_","–")}，很容易混淆；但它的开头或结尾声音与 <b>${answer.w}</b> 不同。下次先听第一个音，再听最后一个音。`
+        :`你选的 <b>${selected.w}</b> 主要包含 <b>${selected.pid.replace("_","–")}</b>（${selectedPattern.sound}），不是这题需要的 <b>${p.id.replace("_","–")}</b>。先圈元音组合，再比较选项。`;
+      const overlay=document.createElement("div");overlay.className="feedback-overlay";overlay.setAttribute("role","dialog");overlay.setAttribute("aria-modal","true");overlay.setAttribute("aria-labelledby","feedbackTitle");
+      overlay.innerHTML=`<section class="feedback-sheet">
+        <div class="feedback-head">
+          <div class="feedback-badge"><div class="mark">🪨</div><div><h2 id="feedbackTitle">一起修复这颗魔法石：<span>${answer.w}</span></h2><p>完成眼前3个小动作，稍后它会回来让你独立答对。</p></div></div>
+          <div class="pause-chip">⏸ 学习线索时计时暂停</div>
+        </div>
+        <div class="child-explain"><b>${answer.w}</b> 里面藏着 <b>${p.id.replace("_","–")}</b>，在这里发 ${p.sound}。先听完整单词，再按 <b>${answer.split}</b> 慢慢合起来。</div>
+        <div class="error-focus"><b>${diagnosis.icon} 系统判断：${diagnosis.label}</b><br>${diagnosis.child}<br>下一次这样做：${diagnosis.method}</div>
+        <section class="repair-quest">
+          <h3>🧪 魔法石修复任务</h3>
+          <p>必须按顺序完成；第4步会由系统稍后自动安排。</p>
+          <div class="repair-steps">
+            <div class="repair-step" id="repairStep1">
+              <span class="repair-num">1</span><div class="repair-copy"><strong>再听一次</strong><small>先让耳朵重新找到正确声音</small></div>
+              <div class="repair-controls"><button class="repair-mini" id="repairListen">🔊 听 ${answer.w}</button></div>
+            </div>
+            <div class="repair-step locked" id="repairStep2">
+              <span class="repair-num">2</span><div class="repair-copy"><strong>找出正确组合</strong><small>${answer.w} 里是哪支元音小队？</small></div>
+              <div class="repair-controls">${patternChoices.map(x=>`<button class="repair-mini pattern-pick" data-pattern="${x.id}" disabled>${x.id.replace("_","–")}</button>`).join("")}</div>
+            </div>
+            <div class="repair-step locked" id="repairStep3">
+              <span class="repair-num">3</span><div class="repair-copy"><strong>拼一次或者跟读一次</strong><small>任选一种，让眼睛、耳朵和嘴巴一起记</small></div>
+              <div class="repair-controls"><button class="repair-mini" id="repairSpell" disabled>🔤 拼一拼</button><button class="repair-mini" id="repairRepeat" disabled>🗣️ 跟读一次</button></div>
+              <div class="spell-box" id="spellBox"><div class="spell-target" id="spellTarget">_</div><div class="spell-tiles">${spellLetters.map(x=>`<button class="spell-tile" data-letter="${x.letter}" data-tile="${x.index}">${x.letter}</button>`).join("")}</div></div>
+            </div>
+            <div class="repair-step locked" id="repairStep4">
+              <span class="repair-num">4</span><div class="repair-copy"><strong>稍后重新答对</strong><small>2～3题后回访，本轮结束前再确认</small></div>
+              <span class="later-chip" id="laterChip">等待前三步</span>
+            </div>
+          </div>
+        </section>
+        <details class="detail-toggle">
+          <summary>🔍 为什么？查看详细解析</summary>
+          <div class="feedback-grid">
+            <article class="explain-card">
+              <h3>🔮 正确答案卡</h3>
+              <div class="answer-word">${markFocus(answer.w,p.id)}</div>
+              <div class="fact-grid">
+                <div class="fact" style="--fact:${p.color}"><small>单词</small><strong>${answer.w} · ${answer.zh}</strong></div>
+                <div class="fact" style="--fact:${p.color}"><small>核心音标</small><strong>${ipa}</strong></div>
+                <div class="fact" style="--fact:${p.color}"><small>字母组合</small><strong>${p.id.replace("_","–")} · ${answer.split}</strong></div>
+                <div class="fact" style="--fact:${p.color}"><small>发音规律</small><strong>${p.sound}</strong></div>
+              </div>
+              <div class="memory"><span>💡</span><div><b>记忆口诀</b>${memoryTip(p.cat)}</div></div>
+            </article>
+            <article class="explain-card">
+              <h3>🧭 对比分析</h3>
+              <div class="compare-stack">
+                <div class="compare yes"><strong>✅ 为什么是这个？</strong>${whyYes}</div>
+                <div class="compare no"><strong>❌ 为什么不是“${selected.w}”？</strong>${whyNo}</div>
+                <div class="compare yes"><strong>✨ 下次怎么找？</strong>${p.cue}</div>
+              </div>
+            </article>
+          </div>
+        </details>
+        <div class="feedback-actions">
+          <button class="primary" id="feedbackDone" disabled>完成前三步后继续</button>
+        </div>
+      </section>`;
+      document.body.appendChild(overlay);requestAnimationFrame(()=>overlay.classList.add("show"));
+      const task={listened:!!repair.listened,foundPattern:!!repair.foundPattern,produced:!!repair.produced},persist=()=>{
+        if(!entry)return;entry.repair={...(entry.repair||{}),...task,laterPassed:entry.repair?.laterPassed||false};saveWrongBook()
+      };
+      const syncRepair=()=>{
+        $("#repairStep1").classList.toggle("done",task.listened);
+        if(task.listened){$("#repairListen").textContent="✅ 已重新听过";$("#repairListen").classList.add("correct")}
+        $("#repairStep2").classList.toggle("locked",!task.listened);$$(".pattern-pick").forEach(b=>b.disabled=!task.listened||task.foundPattern);
+        $("#repairStep2").classList.toggle("done",task.foundPattern);
+        $("#repairStep3").classList.toggle("locked",!task.foundPattern);$("#repairSpell").disabled=!task.foundPattern||task.produced;$("#repairRepeat").disabled=!task.foundPattern||task.produced;
+        $("#repairStep3").classList.toggle("done",task.produced);
+        const ready=task.listened&&task.foundPattern&&task.produced;$("#repairStep4").classList.toggle("locked",!ready);$("#laterChip").textContent=ready?"✅ 已加入回访队列":"等待前三步";
+        $("#feedbackDone").disabled=!ready;$("#feedbackDone").textContent=ready?"👍 前三步完成，稍后再战":"完成前三步后继续"
+      };
+      $("#repairListen").onclick=()=>{tone();speak(answer.w,.62);task.listened=true;$("#repairListen").textContent="✅ 已重新听过";$("#repairListen").classList.add("correct");persist();syncRepair()};
+      $$(".pattern-pick").forEach(b=>b.onclick=()=>{
+        if(b.dataset.pattern===p.id){tone("correct");task.foundPattern=true;b.classList.add("correct");b.textContent="✅ "+p.id.replace("_","–");persist();syncRepair();showToast("找到了正确的元音小队！")}
+        else{tone("wrong");b.classList.add("wrong");setTimeout(()=>b.classList.remove("wrong"),420);showToast("再看看单词中间的元音伙伴")}
+      });
+      $("#repairSpell").onclick=()=>{$("#spellBox").classList.add("show");$("#repairSpell").textContent="按顺序点字母";$("#spellTarget").textContent="";};
+      let built="";
+      $$(".spell-tile").forEach(b=>b.onclick=()=>{
+        const expected=answer.w.toLowerCase()[built.length];
+        if(b.dataset.letter!==expected){tone("wrong");b.classList.add("wrong");setTimeout(()=>b.classList.remove("wrong"),380);return}
+        tone();built+=b.dataset.letter;b.disabled=true;$("#spellTarget").textContent=built;
+        if(built===answer.w.toLowerCase()){task.produced=true;$("#repairSpell").textContent="✅ 拼写完成";persist();syncRepair();tone("correct");showToast("你把单词拼完整了！")}
+      });
+      $("#repairRepeat").onclick=()=>{tone();speak(answer.w,.58);$("#repairRepeat").textContent="🗣️ 跟着声音说…";setTimeout(()=>{task.produced=true;$("#repairRepeat").textContent="✅ 已跟读一次";persist();syncRepair();showToast("嘴巴也记住这个声音啦！")},850)};
+      $("#feedbackDone").onclick=()=>{
+        const done=$("#feedbackDone");if(done.disabled)return;done.disabled=true;tone("click");overlay.classList.remove("show");setTimeout(()=>overlay.remove(),260);
+        if(state.game){
+          state.game.paused=false;
+          if(!state.game.q.repairRewarded){state.game.q.repairRewarded=true;state.game.energy+=5;showToast("修复任务完成，获得 +5 成长能量 🌱")}
+          if(repairOnly){state.game.q.repairFirst=false;state.game.locked=false;setTimeout(()=>{renderQuestion();if(state.game?.q.type==="listen")playQuestionAudio(state.game.q,.72)},280)}
+          else completeQuestion("shared")
+        }
+      };
+      syncRepair();
+      setTimeout(()=>$("#feedbackDone")?.focus(),420)
+    }
+    function burst(el){
+      const r=el.getBoundingClientRect(),colors=[C.gold,C.cyan,C.green,C.red,C.violet,"#fff"];
+      for(let i=0;i<24;i++){const s=document.createElement("i");s.className="particle";s.style.left=(r.left+r.width/2)+"px";s.style.top=(r.top+r.height/2)+"px";s.style.background=colors[i%colors.length];const a=Math.random()*Math.PI*2,d=45+Math.random()*100;s.style.setProperty("--x",Math.cos(a)*d+"px");s.style.setProperty("--y",Math.sin(a)*d+"px");document.body.appendChild(s);setTimeout(()=>s.remove(),800)}
+    }
+    function finishGame(){
+      const g=state.game;if(!g)return;if(g.timer)clearInterval(g.timer);$(".feedback-overlay")?.remove();
+      let rescheduled=false;(g.sessionWrongIds||[]).forEach(id=>{const e=state.wrongBook.entries[id];if(e&&e.status!=="gem"&&(e.stage||0)===0&&(e.nextReviewAt||0)<=Date.now()){e.nextReviewAt=Date.now()+DAY;rescheduled=true}});
+      if(rescheduled)saveWrongBook();
+      const wasTimed=g.startedTimed||g.timed,rating=wasTimed?(g.score>=280?3:g.score>=150?2:1):(g.correct>=Math.max(1,g.goal-1)?3:g.correct>=Math.ceil(g.goal*.6)?2:1),wasWrongOnly=g.wrongOnly,allCleared=g.allCleared;
+      if(!wasWrongOnly){state.stars+=rating;safeSet("vowelStars",state.stars);updateStars()}tone("correct");
+      $("#challenge").innerHTML=`<div class="result-card"><div class="big">${wasWrongOnly?"🧪":rating===3?"🏆":"🎓"}</div><h2>${wasWrongOnly?"本轮炼金完成":wasTimed?"试炼完成":"轻松练习完成"}！</h2><div class="result-stars">${"★".repeat(rating)}${"☆".repeat(3-rating)}</div><p>${wasTimed?`得分 <strong>${g.score}</strong> · 最高连击 <strong>×${g.best}</strong>`:`完成 <strong>${g.answered}</strong> 题 · 自己答对 <strong>${g.correct}</strong> 题`} · 成长能量 <strong>+${g.energy}</strong><br>${wasWrongOnly?(g.earlyPractice?"这是一次提前巩固；按照魔法书的日期再回来，记忆会更牢。":"每次按计划独立答对，迷糊石都会更接近魔法宝石。"):rating===3?"你的耳朵越来越会发现声音线索了！":rating===2?"今天已经学会了不少，再练一次会更熟悉。":"愿意慢慢听、继续尝试，就是最好的进步。"}</p><div class="card-actions"><button class="primary" id="againBtn">${wasWrongOnly?"继续炼金":"再练一次"}</button>${wasWrongOnly?'<button class="secondary" id="resultBook">📕 查看魔法书</button>':""}<button class="secondary" id="backLearn">返回学习</button></div></div>`;
+      state.game=null;$("#againBtn").onclick=()=>wasWrongOnly?startGame(false,true):startGame(wasTimed);$("#backLearn").onclick=()=>switchMode("learn");if($("#resultBook"))$("#resultBook").onclick=openWrongBook;
+      if(allCleared)setTimeout(showClearCelebration,450)
+    }
+    function clearGame(){if(state.game?.timer)clearInterval(state.game.timer);$(".feedback-overlay")?.remove();state.game=null}
+    function renderAll(){renderCategories();renderPatterns();renderLesson()}
+
+    $("#enterBtn").onclick=()=>{initAudio();$("#welcome").classList.add("closed");startDailyLesson()};
+    $("#exploreBtn").onclick=()=>{initAudio();state.active=true;state.daily=null;$("#welcome").classList.add("closed");tone("open");renderAll();setTimeout(()=>speak("Welcome to Vowel Magic Academy!",.88),260)};
+    $("#wrongBookBtn").onclick=openWrongBook;
+    $("#welcomeWrongBook").onclick=openWrongBook;
+    $("#homeBtn").onclick=()=>{clearGame();state.daily=null;switchMode("learn");refreshHome();$("#welcome").classList.remove("closed")};
+    $("#speakBtn").onclick=()=>{tone();const p=patterns.find(x=>x.id===state.pattern);speak(p.words[state.word].w,.82)};
+    $("#slowBtn").onclick=()=>{tone();const p=patterns.find(x=>x.id===state.pattern);speak(p.words[state.word].w,.55)};
+    $("#nextBtn").onclick=nextWord;
+    $$(".mode-btn").forEach(b=>b.onclick=()=>{tone();switchMode(b.dataset.mode)});
+    $("#soundBtn").onclick=()=>{state.sound=!state.sound;$("#soundBtn").textContent=state.sound?"🔊":"🔇";$("#soundBtn").ariaLabel=state.sound?"关闭音效":"打开音效";if(state.sound)tone();showToast(state.sound?"音效已开启":"音效已关闭")};
+    $("#fullBtn").onclick=()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.()};
+    document.addEventListener("keydown",e=>{if($(".feedback-overlay")){if(e.key==="Escape")showToast("先点击“一起完成”，再进入下一题");return}if($(".wrongbook-overlay")){if(e.key==="Escape")$("#bookClose")?.click();return}if(state.mode==="challenge"&&/^[1-4]$/.test(e.key)){const b=$$(".option")[+e.key-1];if(b&&!b.disabled)b.click()}else if(e.key===" "&&state.mode==="learn"){e.preventDefault();$("#speakBtn").click()}else if(e.key==="ArrowRight"&&state.mode==="learn")nextWord()});
+    window.addEventListener("beforeunload",clearGame);
+    createStars();refreshHome();renderAll();updateWrongBookBadge();
+  </script>
+</body>
+</html>
